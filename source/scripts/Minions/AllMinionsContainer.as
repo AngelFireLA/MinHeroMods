@@ -121,6 +121,7 @@ package Minions
          this.BattleMod_stage2();
          this.BattleMod_stage3();
          this.CreateTestingMinion();
+         this.testMinion();
       }
       
       private function CM(param1:int, param2:String, param3:String, param4:int, param5:int, param6:int, param7:int, param8:int, param9:int, param10:int = 0) : BaseMinion
@@ -2260,6 +2261,27 @@ package Minions
          _loc2_ = Singleton.staticData.m_baseTalentTreesList.FireBear_normal();
          _loc1_.SetTalentTree(2,_loc2_);
       }
+
+      private function testMinion() : void
+      {
+         var _loc2_:MinionTalentTree = null;
+         var _loc1_:BaseMinion = this.CM(MinionDexID.DEX_ID_testMinion,"Eevee","testMinion",100,100,100,100,100,MinionType.TYPE_NORMAL);
+         _loc1_.m_minionIconPositioningX = 0;
+         _loc1_.m_minionIconPositioningY = 0;
+         _loc1_.m_expGainRate = ExpGainRates.EXP_GAIN_RATE_NORMAL;
+         _loc1_.m_numberOfGems = 3;
+         _loc1_.m_numberOfLockedGems = 0;
+         _loc1_.AddStartingMove(1); 
+         _loc1_.AddStartingMove(2); 
+         _loc1_.AddStartingMove(3); 
+         _loc1_.SetSpeacilizaionMoves(4,5,6);
+         _loc2_ = Singleton.staticData.m_baseTalentTreesList.Tortoise_Armor();
+         _loc1_.SetTalentTree(0,_loc2_);
+         _loc2_ = Singleton.staticData.m_baseTalentTreesList.Tortoise_Health();
+         _loc1_.SetTalentTree(1,_loc2_);
+         _loc2_ = Singleton.staticData.m_baseTalentTreesList.Tortoise_Buffs();
+         _loc1_.SetTalentTree(2,_loc2_);
+      }
+      
    }
 }
-

@@ -215,7 +215,9 @@ package States
       
       public static const DEX_ID_testing_minion:int = 105;
       
-      public static const TOTAL_NUM_OF_MINIONS:int = 106;
+      public static const DEX_ID_testMinion:int = 106;
+
+      public static const TOTAL_NUM_OF_MINIONS:int = 107;
       
       public function MinionDexID()
       {
