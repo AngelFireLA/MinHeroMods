@@ -1,5 +1,10 @@
+from PIL import Image
+import zlib
 minion_dex_id_path = "source\scripts\States\MinionDexID.as"
 all_minions_container_path = "source\scripts\Minions\AllMinionsContainer.as"
+symbol_classes_path = "source\symbolClass\symbols.csv"
+new_minion_image_path = r"C:\Dev\basard\Min Hero\MinHeroMods\eevee_minion.png"
+images_folder_path = "source\images"
 
 def add_dex_id(minion_code_name):
     with open(minion_dex_id_path, "r") as f:
@@ -111,9 +116,105 @@ def add_minion_container(minion_code_name:str, minion_name:str, icon_offset_x:in
 
     #private function CM(param1:int, param2:String, param3:String, param4:int, param5:int, param6:int, param7:int, param8:int, param9:int, param10:int = 0) : BaseMinion
 
+def add_image(image_path, minion_code_name):
+
+    # open the symbols.csv file and get the last value of the first column
+    with open(symbol_classes_path, "r") as f:
+        lines = f.readlines()
+        # remove any empty lines
+        lines = [line for line in lines if line.strip()]
+        last_value = lines[-1].split(";")[0] 
+    new_index = int(last_value) + 1
+    new_file_name = f"{new_index}_Utilities.SpriteHandler_{minion_code_name}.png"
+
+    new_line = f"{new_index};Utilities.SpriteHandler_{minion_code_name}\n"
+    with open(symbol_classes_path, "w") as f:
+        f.writelines(lines)
+        f.write(new_line)
+
+    custom_sprite_handler_path = f"source/scripts/Utilities/SpriteHandler_{minion_code_name}.as"
+    custom_sprite_handler_content = f"""
+package Utilities
+{{
+   import mx.core.BitmapAsset;
+   
+   [Embed(source="/_assets/{new_file_name}")]
+   public class SpriteHandler_{minion_code_name} extends BitmapAsset
+   {{
+       
+      public function SpriteHandler_{minion_code_name}()
+      {{
+         super();
+      }}
+   }}
+}}
+"""
+    with open(custom_sprite_handler_path, "w") as f:
+        f.write(custom_sprite_handler_content)
+
+    main_sprite_handler_path = f"source/scripts/Utilities/SpriteHandler.as"
+    custom_minion_line = f"      private static var {minion_code_name}:Class = SpriteHandler_{minion_code_name};\n"
+
+    with open(main_sprite_handler_path, "r") as f:
+        lines = f.readlines()
+        for i, line in enumerate(lines):
+            if "public class SpriteHandler" in line:
+                lines.insert(i + 2, custom_minion_line)
+                break
+    with open(main_sprite_handler_path, "w") as f:
+        f.writelines(lines)
+
+    # open dump.xml
+    dump_xml_path = "dump.xml"
+    with open(dump_xml_path, "r") as f:
+        dump_lines = f.readlines()
+
+    # find the first line containing '<item type="DefineBitsLossless2Tag" bitmapColorTableSize="0"'
+    define_bits_index = None
+    for idx, line in enumerate(dump_lines):
+        if '<item type="DefineBitsLossless2Tag" bitmapColorTableSize="0"' in line:
+            define_bits_index = idx
+            break
+
+    im = Image.open(image_path).convert("RGBA")
+    w, h = im.size
+
+    # 2) Split & re-merge, swapping R and B → now each pixel is B,G,R,A
+    r, g, b, a = im.split()
+    bgra = Image.merge("RGBA", (a, r, g, b))
+
+    # 3) Get the raw bytes and compress them
+    raw = bgra.tobytes()        # length = w*h*4
+    comp = zlib.compress(raw)
+    hexstr = comp.hex()
+    image_string = f"""
+    <item type="DefineBitsLossless2Tag" bitmapColorTableSize="0" bitmapFormat="5" bitmapHeight="{h}" bitmapWidth="{w}" characterID="{new_index}" forceWriteAsLong="true" zlibBitmapData="{hexstr}"/>
+"""
+    # insert the image_string on the line just before the define_bits_index
+    dump_lines.insert(define_bits_index, image_string)
+
+    # find all the indices where </tags> appears
+    closing_tag_indices = [i for i, line in enumerate(dump_lines) if "</tags>" in line]
+    # the 3rd occurrence is at index 2 in that list
+    third_index = closing_tag_indices[2]
+    # insert your new <item> line just above it
+    dump_lines.insert(third_index, f"        <item>{new_index}</item>\n")
+
+    # find all the indices where </names> appears
+    name_tag_indices = [i for i, line in enumerate(dump_lines) if "</names>" in line]
+    last_index = name_tag_indices[-1]
+    # insert your new <item> line just above it
+    dump_lines.insert(last_index, f"        <item>Utilities.SpriteHandler_{minion_code_name}</item>\n")
+
+
+    with open(dump_xml_path, "w") as f:
+        f.writelines(dump_lines)
+
+
 def add_minion():
-    add_dex_id("testMinion")
-    add_minion_container("testMinion", "Eevee", 0, 0, "normal", 4, [1, 2, 3], 100, 100, 100, 100, 100, [4, 5, 6], "water")
+    add_dex_id("eeveeMinion")
+    add_minion_container("eeveeMinion", "Eevee", 0, 0, "normal", 4, [1, 2, 3], 100, 100, 100, 100, 100, [4, 5, 6], "water")
+    add_image(new_minion_image_path, "eeveeMinion")
 
 
 if __name__ == "__main__":
