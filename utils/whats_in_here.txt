@@ -1,0 +1,5 @@
+extract_from_swf.bat -> Script to extract all the code from a SWF file
+
+MinionDB.csv -> A CSV file that stores all the in-game stats of each minion. Use when developing minions to estimate the max stat in comparison to the in-game stat
+
+TCrogSaveSlot0.sol -> An example save file that contains 100% completion of base game. Use when you need a completed example.
