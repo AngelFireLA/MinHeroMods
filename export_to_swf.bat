@@ -11,7 +11,7 @@ echo Backing up default.swf → old\default_%TS%.swf
 copy /Y "default.swf" "old\default_%TS%.swf" >nul
 
 REM ─── Run your JPEXS importScript call ──────────────────────────────────
-echo Importing scripts from source\…
-"jpexs\ffdec-cli.exe" -importScript "original.swf" "default.swf" "source"
+echo Importing scripts from modified\…
+"jpexs\ffdec-cli.exe" -importScript "original.swf" "default.swf" "modified"
 
 pause

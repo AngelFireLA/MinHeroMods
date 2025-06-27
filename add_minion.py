@@ -4,11 +4,27 @@ all_minions_container_path = "source\scripts\Minions\AllMinionsContainer.as"
 def add_dex_id(minion_code_name):
     with open(minion_dex_id_path, "r") as f:
         content = f.read()
+
+        line_to_replace = next(line for line in content.splitlines() if "public static const DEX_ID_battleModMinion_1:int =" in line)
+        first_num = int(line_to_replace.split("=")[1].strip().rstrip(";"))
+        new_line_to_replace =  f"      public static const DEX_ID_battleModMinion_1:int = {first_num+1};"
+        content = content.replace(line_to_replace, new_line_to_replace)
+
+        line_to_replace = next(line for line in content.splitlines() if "public static const DEX_ID_battleModMinion_2:int =" in line)
+        new_line_to_replace =  f"      public static const DEX_ID_battleModMinion_2:int = {first_num+2};"
+        content = content.replace(line_to_replace, new_line_to_replace)
+
+        line_to_replace = next(line for line in content.splitlines() if "public static const DEX_ID_battleModMinion_3:int =" in line)
+        new_line_to_replace =  f"      public static const DEX_ID_battleModMinion_3:int = {first_num+3};"
+        content = content.replace(line_to_replace, new_line_to_replace)
+
+        line_to_replace = next(line for line in content.splitlines() if "public static const DEX_ID_testing_minion:int =" in line)
+        new_line_to_replace =  f"      public static const DEX_ID_testing_minion:int = {first_num+4};"
+        content = content.replace(line_to_replace, new_line_to_replace)
+
         total_num_line = next(line for line in content.splitlines() if "public static const TOTAL_NUM_OF_MINIONS:int =" in line)
-        total_num = int(total_num_line.split("=")[1].strip().rstrip(";"))
-        total_num += 1
-        minion_amount_line =  f"      public static const TOTAL_NUM_OF_MINIONS:int = {total_num};"
-        new_minion_line = f"      public static const DEX_ID_{minion_code_name}:int = {total_num-1};"
+        minion_amount_line =  f"      public static const TOTAL_NUM_OF_MINIONS:int = {first_num+5};"
+        new_minion_line = f"      public static const DEX_ID_{minion_code_name}:int = {first_num};"
         content = content.replace(total_num_line, f"{new_minion_line}\n\n{minion_amount_line}")
         
     with open(minion_dex_id_path, "w") as f:
