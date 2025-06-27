@@ -69,8 +69,9 @@ def main():
     else:
         print("No modified files found, nothing copied.")
 
-    # Overwrite CSV with current hashes
-    save_current_hashes(curr_hashes)
+    if prev_hashes == {}:
+        # Overwrite CSV with current hashes
+        save_current_hashes(curr_hashes)
 
 if __name__ == "__main__":
     main()
