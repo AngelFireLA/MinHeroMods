@@ -113,7 +113,7 @@ def add_minion_container(minion_code_name:str, minion_name:str, icon_offset_x:in
 
 def add_minion():
     add_dex_id("testMinion")
-    add_minion_container("testMinion", "Eevee", 0, 0, "normal", 4, [1, 2, 3], 100, 100, 100, 100, 100, [4, 5, 6], "normal")
+    add_minion_container("testMinion", "Eevee", 0, 0, "normal", 4, [1, 2, 3], 100, 100, 100, 100, 100, [4, 5, 6], "water")
 
 
 if __name__ == "__main__":
