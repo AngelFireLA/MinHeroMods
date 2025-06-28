@@ -99,7 +99,7 @@ def add_minion_container(minion_code_name:str, minion_name:str, icon_offset_x:in
     # We have to handle the cases where the minions has either 1 or two types
     minion_type_str = f"MinionType.{minion_types[minion_type1]}" if not minion_type2 else f"MinionType.{minion_types[minion_type1]},MinionType.{minion_types[minion_type2]}"
     
-    
+    # The function for the minions container that includes information about the minion
     minion_code_block = f"""
       private function {minion_code_name}() : void
       {{
@@ -121,12 +121,15 @@ def add_minion_container(minion_code_name:str, minion_name:str, icon_offset_x:in
       }}
       """
 
+    # the function needs to be initialized in the AllMinionsContainer.as file
     init_line = f"         this.{minion_code_name}();"
+
     with open(all_minions_container_path, "r") as f:
         content = f.read()
         all_lines = content.splitlines()
 
-        # add codeblock before the last function in the file
+        # we find the last line that contains "_loc1_.SetTalentTree" because we know it will be the next-to-last line before the end of the functions
+        # so we can just add our own function 2 lines below that
         for i in range(len(all_lines)-1, -1, -1):
             if "_loc1_.SetTalentTree" in all_lines[i]:
                 insert_index = i
@@ -134,36 +137,41 @@ def add_minion_container(minion_code_name:str, minion_name:str, icon_offset_x:in
         insert_index += 2
         all_lines.insert(insert_index, minion_code_block)
 
-        # get the index of the line that contains "private function CM"
+        # we get the start of the function just before where we'll have to init our function
         cm_index = next(i for i, line in enumerate(all_lines) if "private function CM(" in line)
-        # get the first line that contains } in the lines before the cm_index
+        
+        # we get the first } before the cm_index because it will be the end of the function where we want to add the init line
+        # so we can add our init line before the last closing brace
         for i in range(cm_index-1, -1, -1):
             if "}" in all_lines[i]:
                 last_closing_brace_index = i
                 break
-        # add the init line before the last closing brace
         all_lines.insert(last_closing_brace_index, init_line)
         content = "\n".join(all_lines)
+
     with open(all_minions_container_path, "w") as f:
         f.write(content)
 
 
 def add_image(image_path, minion_code_name):
 
-    # open the symbols.csv file and get the last value of the first column
+    # we get the last index of the symbol classes so we know what new index to use for the new image
     with open(symbol_classes_path, "r") as f:
         lines = f.readlines()
         # remove any empty lines
         lines = [line for line in lines if line.strip()]
         last_value = lines[-1].split(";")[0] 
-    new_index = int(last_value) + 1
-    new_file_name = f"{new_index}_Utilities.SpriteHandler_{minion_code_name}.png"
 
+    new_index = int(last_value) + 1
+
+    # we add it to the file even though it doesn't do anything, just in case we want to add another minion later
     new_line = f"{new_index};Utilities.SpriteHandler_{minion_code_name}\n"
     with open(symbol_classes_path, "w") as f:
         f.writelines(lines)
         f.write(new_line)
 
+    # We make the imag's unique class so it can later be imported in the swf file to replace the one made using xml
+    new_file_name = f"{new_index}_Utilities.SpriteHandler_{minion_code_name}.png"
     custom_sprite_handler_path = f"source/scripts/Utilities/SpriteHandler_{minion_code_name}.as"
     custom_sprite_handler_content = f"""
 package Utilities
@@ -184,26 +192,28 @@ package Utilities
     with open(custom_sprite_handler_path, "w") as f:
         f.write(custom_sprite_handler_content)
 
+    # We define the image in the main SpriteHandler.as file
     main_sprite_handler_path = f"source/scripts/Utilities/SpriteHandler.as"
     custom_minion_line = f"      private static var {minion_code_name}:Class = SpriteHandler_{minion_code_name};\n"
 
     with open(main_sprite_handler_path, "r") as f:
         lines = f.readlines()
+        # we find the last SpriteHandler definition so we can add our line  abit below
         for i, line in enumerate(lines):
             if "public class SpriteHandler" in line:
                 lines.insert(i + 2, custom_minion_line)
                 break
     with open(main_sprite_handler_path, "w") as f:
         f.writelines(lines)
+
     print("Starting swf2xml...")
     subprocess.run(fr'"jpexs\ffdec-cli.exe" -swf2xml {base_swf_path} {intermediary_xml_path}', shell=True)
     print("SWF to XML conversion completed.")
-    # open dump.xml
 
     with open(intermediary_xml_path, "r") as f:
         dump_lines = f.readlines()
 
-    # find the first line containing '<item type="DefineBitsLossless2Tag" bitmapColorTableSize="0"'
+    # we anchor ourselves on a specific line we know we can add the image code just before
     define_bits_index = None
     for idx, line in enumerate(dump_lines):
         if '<item type="DefineBitsLossless2Tag" bitmapColorTableSize="0"' in line:
@@ -213,27 +223,34 @@ package Utilities
     im = Image.open(image_path).convert("RGBA")
     w, h = im.size
 
-    # 2) Split & re-merge, swapping R and B → now each pixel is B,G,R,A
+    # To not have wrong colors, we have to swap some channels around.
     r, g, b, a = im.split()
     bgra = Image.merge("RGBA", (a, r, g, b))
 
-    # 3) Get the raw bytes and compress them
-    raw = bgra.tobytes()        # length = w*h*4
+    # 3) We compress the image in a format flash understand
+    raw = bgra.tobytes()
     comp = zlib.compress(raw)
     hexstr = comp.hex()
+
+    # Template copy pasted and then we replace the values with the ones we need
     image_string = f"""
     <item type="DefineBitsLossless2Tag" bitmapColorTableSize="0" bitmapFormat="5" bitmapHeight="{h}" bitmapWidth="{w}" characterID="{new_index}" forceWriteAsLong="true" zlibBitmapData="{hexstr}"/>
 """
-    # insert the image_string on the line just before the define_bits_index
+    # we add the image to the xml file
     dump_lines.insert(define_bits_index, image_string)
 
+    # We need to add the image to the symbol classes, so we anchor ourselves on specific lines so we can add the new values just before them
     closing_tag_indices = [i for i, line in enumerate(dump_lines) if "</tags>" in line]
     third_index = closing_tag_indices[2]
     dump_lines.insert(third_index, f"        <item>{new_index}</item>\n")
+
     name_tag_indices = [i for i, line in enumerate(dump_lines) if "</names>" in line]
     last_index = name_tag_indices[-1]
     dump_lines.insert(last_index, f"        <item>Utilities.SpriteHandler_{minion_code_name}</item>\n")
 
+
+    # To add the new class file, we use a template of a whole new tag so we just have to replace the values we need and the rest we can ignore
+    # we'll replace the classes' content later anyway, we just need to have it exist in the XML file so it can be imported into the SWF file later.
     string_to_add = f"""
     <item type="DoABC2Tag" flags="0" forceWriteAsLong="false" name="Utilities.SpriteHandler_{minion_code_name}">
       <abc type="ABC">
@@ -344,12 +361,12 @@ package Utilities
       </abc>
     </item>
 """
+    # we anchor ourselves on a specific line we know we can add the tag just before
     idk = [i for i, line in enumerate(dump_lines) if '<item type="ExportAssetsTag" forceWriteAsLong="true">' in line]
     last_index = idk[0]
-    # add the string_to_add before the last index
     dump_lines.insert(last_index, string_to_add)
 
-
+    # We write the modified XML file
     with open(intermediary_xml_path, "w") as f:
         f.writelines(dump_lines)
 
