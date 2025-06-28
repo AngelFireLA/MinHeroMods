@@ -76,7 +76,7 @@ package
          Singleton.dynamicData.SetHasUnlockedFloor(0,true);
          Singleton.dynamicData.SetHasTutorialBeenSeen(TutorialTypes.TUTORIAL_FOCUS_TARGETS,true);
          Singleton.dynamicData.m_isAutoSaveOn = true;
-         Singleton.utility.m_screenControllers.SetSceneTo(GameState.SPONSOR_SCREEN,false);
+         Singleton.utility.m_screenControllers.SetSceneTo(GameState.SPONSOR_SCREEN,false); // CHANGE THIS TO "MAIN_MENU"
          Singleton.dynamicData.SetNewReturnToOnDeathPoint();
          addEventListener(Event.ENTER_FRAME,this.Update);
          stage.addEventListener(MouseEvent.CLICK,this.GlobalMouseClicked);
