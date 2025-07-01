@@ -183,24 +183,25 @@ package MainMenu
          }
       }
       
-      public function SlotSelected(param1:MouseEvent) : void
+      public function SlotSelected(param1:MouseEvent) : void //on selecting a SaveSlot
       {
-         if(this.m_hasDeleteBeenPressed)
+         if(this.m_hasDeleteBeenPressed) //were we deleting it?
          {
             return;
          }
-         Singleton.dynamicData.m_saveSlot = this.m_saveSlotID;
-         if(!Singleton.dynamicData.GetIsSaveSlotInUse(this.m_saveSlotID))
+         Singleton.dynamicData.m_saveSlot = this.m_saveSlotID; //get the ID
+         if(!Singleton.dynamicData.GetIsSaveSlotInUse(this.m_saveSlotID)) //is it unused?
          {
-            Singleton.utility.m_screenControllers.m_mainMenuScreen.AnimateInTheCharSelectionScreen();
+            Singleton.utility.m_screenControllers.m_mainMenuScreen.AnimateInTheCharSelectionScreen(); //get the selection screen. INSERT MOD CUSTOMISING WINDOW HERE!!!
          }
          else
          {
-            Singleton.utility.m_screenControllers.m_topDownScreen.m_topDownMovementScreen.m_currLevel = null;
-            Singleton.dynamicData.LoadData(this.m_saveSlotID);
+            Singleton.utility.m_screenControllers.m_topDownScreen.m_topDownMovementScreen.m_currLevel = null; //we don't know our current level
+            Singleton.dynamicData.LoadData(this.m_saveSlotID); // now we load the data when selected.
+            Singleton.dynamicData.CreateObjectsBeforeSaveLoad(); //Once loaded, check anything that needs to be done before game start but after the save file is loaded
             Singleton.utility.m_soundController.FadeCurrentMusic(0,1);
             Singleton.utility.m_screenControllers.m_mainMenuScreen.FadeOutForReturnToGame();
-            TweenLite.to(this,1,{"onComplete":this.GotoTopdown});
+            TweenLite.to(this,1,{"onComplete":this.GotoTopdown}); //animation to start the TopDown screen, i.e THE GAME
          }
       }
       

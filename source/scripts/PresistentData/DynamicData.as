@@ -6,8 +6,10 @@ package PresistentData
    import States.MinionDexID;
    import States.OrientationState;
    import States.TutorialTypes;
+   import States.ModTypes;
    import TopDown.Trainers.TrainerDataObject;
    import Utilities.Singleton;
+   import Utilities.SocketManager;
    import flash.net.SharedObject;
    
    public class DynamicData
@@ -137,6 +139,10 @@ package PresistentData
       
       public var m_isExtraSponsorMinionEarned:Boolean;
       
+      public var m_isMod:Vector.<Boolean>; // Single list that contains all the mods that are loaded
+
+      private var socketManager:SocketManager; //SocketManager instance
+
       public function DynamicData()
       {
          super();
@@ -181,13 +187,302 @@ package PresistentData
          this.m_ownedGems = new Vector.<OwnedGem>(1485);
          Singleton.staticData.CreateObjectsAfterDynamicData();
          this.LoadInitialData();
-         this.LoadData(this.m_saveSlot);
+         this.LoadData(this.m_saveSlot); //Loads data at the initial save slot for now. Use other functions for proper stuff
          this.m_isTalentTreeInSimpleMode = false;
          this.m_isInMysteryMode = false;
          this.m_isMovementTutorialActive = false;
          this.m_movementTutorialStepCounter = 0;
          this.m_numberOfDeathsSinceVictory = 0;
          this.m_numOfAvailbleStars = 1000;
+         this.m_isMod = new Vector.<Boolean>(ModTypes.NUM_MODS) //creates initial list of mods
+         for (var i:int = 0; i < ModTypes.NUM_MODS; i++) {
+            this.m_isMod[i] = false; // defaults all to False
+         }
+      }
+
+      public function CreateObjectsBeforeSaveLoad() : void //creates all the objects just before loading the save file. This is necessary because it provides
+      {
+         if(this.getModStatusFromID(ModTypes.MULTI)) //if the multiplayer mode is enabled, we should probably connect now.
+         {
+            socketManager = SocketManager.getInstance(); //get connection instance
+            socketManager.addEventListener(DataEvent.DATA_RECEIVED,onDataReceived);
+            socketManager.isEnabled = true
+         }
+         else //otherwise, we are not multiplayer mode
+         {
+            SocketManager.isEnabled = false  //default connection to false
+         } //add initial setup for the other mods here. Stuff like initialisers, if needed
+
+      }
+
+      private function onDataReceived(event:DataEvent) : void
+      {
+         var data:String = event.data;
+         parseAnyData(data);
+      }
+      
+      private function parseAnyData(data:String) : *  //data processing for multi mode
+      {
+         var dataArray:Array = data.split("$$");
+         var the_type:String = dataArray.shift();
+         switch(the_type)
+         {
+            case "replaceCurrentTeam":
+               var i:int = 0;
+               while(i < dataArray.length)
+               {
+                  if(dataArray[i] != "")
+                  {
+                     m_ownedMinions[i] = parseMinionData(dataArray[i]);
+                  }
+                  i++;
+               }
+         }
+      }
+      
+      private function parseMinionData(data:String) : OwnedMinion //parse minion data into an OwnedMinion object
+      {
+         var minionData:Array = data.split("|");
+         var minion:OwnedMinion = new OwnedMinion(0);
+         var i:int = 0;
+         while(i < minionData.length)
+         {
+            var keyValue:Array = minionData[i].split("§");
+            var key:String = keyValue[0];
+            var value:String = keyValue[1];
+            switch(key)
+            {
+               case "minionID":
+                  minion.minionID = int(value);
+                  break;
+               case "minionDexID":
+                  minion.m_minionDexID = int(value);
+                  break;
+               case "minionName":
+                  minion.m_minionName = value.replace(/\"/g,"");
+                  break;
+               case "isPlayersMinion":
+                  minion.m_isPlayersMinion = value == "true";
+                  break;
+               case "trainerType":
+                  minion.m_trainerType = int(value);
+                  break;
+               case "statBonus":
+                  minion.m_statBonus = int(value);
+                  break;
+               case "currHealthStat":
+                  minion.currHealthStat = int(value);
+                  break;
+               case "currEnergyStat":
+                  minion.currEnergyStat = int(value);
+                  break;
+               case "currAttackStat":
+                  minion.currAttackStat = int(value);
+                  break;
+               case "currHealingStat":
+                  minion.currHealingStat = int(value);
+                  break;
+               case "currSpeedStat":
+                  minion.currSpeedStat = int(value);
+                  break;
+               case "currentExp":
+                  minion.m_currentExp = int(value);
+                  break;
+               case "trainedMove":
+                  minion.m_trainedMove = int(value);
+                  break;
+               case "IVs":
+                  minion.m_IVs = parseList(value,"~");
+                  break;
+               case "gems":
+                  minion.m_gems = parseGems(value);
+                  break;
+               case "currHealth":
+                  minion.currHealth = int(value);
+                  break;
+               case "currEnergy":
+                  minion.currEnergy = int(value);
+                  break;
+               case "currShield":
+                  minion.currShield = int(value);
+                  break;
+               case "maxShield":
+                  minion.maxShield = int(value);
+                  break;
+               case "isBattleModShieldActive":
+                  minion.m_isBattleModShieldActive = value == "true";
+                  break;
+               case "isExtraBattleModMinion":
+                  minion.m_isExtraBattleModMinion = value == "true";
+                  break;
+               case "currExhaust":
+                  minion.m_currExhaust = int(value);
+                  break;
+               case "currStatStages":
+                  minion.m_currStatStages = parseList(value,"~");
+                  break;
+               case "moveOrderPosition":
+                  minion.m_moveOrderPosition = int(value);
+                  break;
+               case "hasMovedOnThisTurn":
+                  minion.m_hasMovedOnThisTurn = value == "true";
+                  break;
+               case "isFrozen":
+                  minion.m_isFrozen = value == "true";
+                  break;
+               case "turnsFrozen":
+                  minion.m_turnsFrozen = int(value);
+                  break;
+               case "isStunned":
+                  minion.m_isStunned = value == "true";
+                  break;
+               case "currChargeMove":
+                  minion.m_currChargeMove = value.replace(/\"/g,"");
+                  break;
+               case "chargeAlliesItHits":
+                  minion.m_chargeAlliesItHits = parseList(value,"~");
+                  break;
+               case "chargeEnemiesItHits":
+                  minion.m_chargeEnemiesItHits = parseList(value,"~");
+                  break;
+               case "currCharge":
+                  minion.m_currCharge = int(value);
+                  break;
+               case "currLevel":
+                  minion.m_currLevel = int(value);
+                  break;
+               case "currExpPercentageToNextLevel":
+                  minion.m_currExpPercentageToNextLevel = Number(value);
+                  break;
+               case "allMoves":
+                  minion.allMoves = parseList(value,"~");
+                  break;
+               case "activeMoves":
+                  minion.m_activeMoves = parseList(value,"~");
+                  break;
+               case "globalMoves":
+                  minion.m_globalMoves = parseList(value,"~");
+                  break;
+               case "availableTalentPoints":
+                  minion.m_availableTalentPoints = int(value);
+                  break;
+               case "currHealthPercentage":
+                  minion.m_currHealthPercentage = Number(value);
+                  break;
+               case "currEnergyPercentage":
+                  minion.m_currEnergyPercentage = Number(value);
+                  break;
+               case "maxHealthStat":
+                  minion.m_maxHealthStat = int(value);
+                  break;
+               case "maxEnergyStat":
+                  minion.m_maxEnergyStat = int(value);
+                  break;
+               case "maxAttackStat":
+                  minion.m_maxAttackStat = int(value);
+                  break;
+               case "maxHealingStat":
+                  minion.m_maxHealingStat = int(value);
+                  break;
+               case "currCritChance":
+                  minion.m_currCritChance = Number(value);
+                  break;
+               case "currArmorModRate":
+                  minion.m_currArmorModRate = Number(value);
+                  break;
+               case "currReflectDamagePercentage":
+                  minion.m_currReflectDamagePercentage = Number(value);
+                  break;
+               case "currRedirectDamage":
+                  minion.m_currRedirectDamage = Number(value);
+                  break;
+            }
+            i++;
+         }
+         return minion;
+      }
+      
+      private function parseList(data:String, separator:String) : Vector.<int> //parse a list of anything with a given separator
+      {
+         var elements:Array = data.split(separator);
+         var list:Vector.<int> = new Vector.<int>();
+         var i:int = 0;
+         while(i < elements.length)
+         {
+            list.push(int(elements[i]));
+            i++;
+         }
+         return list;
+      }
+      
+      private function parseGems(data:String) : Vector.<OwnedGem> //gets a list of gems
+      {
+         var gemsData:Array = data.split("~");
+         var gems:Vector.<OwnedGem> = new Vector.<OwnedGem>(4);
+         var i:int = 0;
+         while(i < gemsData.length)
+         {
+            if(gemsData[i] == "null")
+            {
+               gems[i] = null;
+            }
+            else
+            {
+               gems[i] = parseGem(gemsData[i]);
+            }
+            i++;
+         }
+         return gems;
+      }
+      
+      private function parseGem(data:String) : OwnedGem //parses a singular gem
+      {
+         var gemData:Array = data.split("&");
+         var gem:OwnedGem = new OwnedGem();
+         var i:int = 0;
+         while(i < gemData.length)
+         {
+            var keyValue:Array = gemData[i].split("#");
+            var key:String = keyValue[0];
+            var value:String = keyValue[1];
+            switch(key)
+            {
+               case "tier":
+                  gem.m_tier = int(value);
+                  break;
+               case "health":
+                  gem.rawStats[StatType.STAT_HEALTH] = Number(value);
+                  break;
+               case "energy":
+                  gem.rawStats[StatType.STAT_ENERGY] = Number(value);
+                  break;
+               case "attack":
+                  gem.rawStats[StatType.STAT_ATTACK] = Number(value);
+                  break;
+               case "healing":
+                  gem.rawStats[StatType.STAT_HEALING] = Number(value);
+                  break;
+               case "speed":
+                  gem.rawStats[StatType.STAT_SPEED] = Number(value);
+                  break;
+               case "facetPositions":
+                  gem.m_facetPositions = parseList(value,":");
+                  break;
+            }
+            i++;
+         }
+         return gem;
+      }
+      
+      private function sendData(data:String) : void //send data
+      {
+         if(!socketManager.isEnabled)
+         socketManager.sendData(data);
+      }
+
+      public function getModStatusFromID(param1:int) : Boolean //param1 is the ID of the mod as per ModTypes.as
+      {
+         return this.m_isMod[param1] //returns the bool within the m_isMod thingy
       }
       
       public function get m_currRoomOfTower() : int
@@ -1032,7 +1327,7 @@ package PresistentData
          return finalReturnArray;
       }
       
-      public function SaveAllData(param1:int) : void
+      public function SaveAllData(param1:int) : void //param1 is the ID of the SaveSlot
       {
          var _loc5_:int = 0;
          this.m_sharedObject = SharedObject.getLocal("TCrpgSaveSlot" + param1);
@@ -1132,8 +1427,8 @@ package PresistentData
             }
             _loc2_++;
          }
-         this.m_sharedObject.flush();
-         this.m_sharedObject = SharedObject.getLocal("TCrpgInitialData");
+         this.m_sharedObject.flush(); // clear out the save file
+         this.m_sharedObject = SharedObject.getLocal("TCrpgInitialData"); // load initial data
          this.SaveValue("m_isSoundOn");
          this.SaveValue("m_isMusicOn");
          this.SaveValue("m_characterNames",param1);
@@ -1142,6 +1437,11 @@ package PresistentData
          this.SaveValue("m_totalStars",param1);
          this.SaveValue("m_isSaveSlotInUse",param1);
          this.SaveValue("m_isMaleMetaData",param1);
+         _loc2_ = 0;
+         while(_loc2_ < ModTypes.NUM_MODS)
+         {
+            this.SaveValue("m_IsMod"+String(_loc2_)+"On",param1)
+         }
          this.m_sharedObject.flush();
          this.m_sharedObject = SharedObject.getLocal("TCrpgSaveSlot" + param1);
       }
@@ -1264,7 +1564,7 @@ package PresistentData
          }
       }
       
-      public function LoadInitialData() : void
+      public function LoadInitialData() : void  //ADD HERE
       {
          if(this.m_resetSaveData)
          {
@@ -1282,13 +1582,30 @@ package PresistentData
             this.SetInitialValue("m_totalStars",0,_loc1_);
             this.SetInitialValue("m_isSaveSlotInUse",false,_loc1_);
             this.SetInitialValue("m_isMaleMetaData",true,_loc1_);
+            var _loc2_:int = 0
+            while(_loc2_ < ModTypes.NUM_MODS) //for each mod
+            {
+               this.SetInitialValue("m_IsMod",false,_loc1_,_loc2_); //set value of "m_IsMod[X]On[Y]" to false if not done so already. [X] is the ModType (_loc2_), and [Y] is the SaveSlotID (_loc1_)
+               _loc2_++;
+            }
             _loc1_++;
          }
       }
       
-      private function SetInitialValue(param1:String, param2:Object, param3:int = -99, param4:int = -99) : void
+      private function SetInitialValue(param1:String, param2:Object, param3:int = -99, param4:int = -99) : void //param1 is the name of the entry, param2 is the value to set to it, param3 defines the suffix to add to it because it's incrementing for each one (so 0-2 for save files), and param4 is... we don't care
       {
-         if(param3 == -99)
+         if(param1 == "m_IsMod") //if the param1 is asking for the modType value
+            {
+               if(this.m_sharedObject.data[param1+String(param4)+"On"+String(param3)] != null) //if there's already a value for it
+               {
+                  this["m_isMod"][param4] = this.m_sharedObject.data[param1+String(param4)+"On"+String(param3)] //set it as the loaded value
+               }
+               else //otherwise, it needs to be created
+               {
+                  this["m_isMod"][param4] = param2 //default value is False
+               }
+            }
+         else if(param3 == -99)
          {
             if(this.m_sharedObject.data[param1] != null)
             {
@@ -1300,7 +1617,7 @@ package PresistentData
                this.m_sharedObject.data[param1] = param2;
             }
          }
-         else if(param4 == -99)
+         else if(param4 == -99) //triggers on the case of the "TCrpgInitialData" for multiple save slots
          {
             if(this.m_sharedObject.data[param1 + param3] != null)
             {
@@ -1323,9 +1640,15 @@ package PresistentData
          }
       }
       
-      private function SaveValue(param1:String, param2:int = -99, param3:int = -99) : void
+      private function SaveValue(param1:String, param2:int = -99, param3:int = -99) : void //param1 is the name of the variable to save, param2 is the index to add after it, and param3 is the third index for things with slots (i.e minions)
       {
-         if(param2 == -99)
+         if(param1.indexOf("m_IsMod")) //if the param1 is a mod index
+         {
+            //_tmpData:int = parseInt(param1.replace("m_IsMod","").split("On")[0]) //gets the ModType index from just the number
+            _tmpData:int = parseInt(param1) //only extracts the ModType integer (possibly?)
+            this.m_sharedObject.data[param1] = this["m_IsMod"][_tmpData] //find the current value and sets it to the data
+         }
+         else if(param2 == -99)
          {
             this.m_sharedObject.data[param1] = this[param1];
          }

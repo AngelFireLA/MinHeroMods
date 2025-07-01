@@ -150,7 +150,7 @@ package MainMenu
       {
          Singleton.dynamicData.SetCharName(Singleton.dynamicData.m_saveSlot,this.m_enterNameText.text);
          Singleton.dynamicData.SetIsSaveSlotInUse(Singleton.dynamicData.m_saveSlot,true);
-         Singleton.utility.m_screenControllers.m_mainMenuScreen.StartTheEnterGameForTheFirstTimeAnimaiton();
+         Singleton.utility.m_screenControllers.m_mainMenuScreen.StartTheEnterGameForTheFirstTimeAnimaiton(); //after creating the character, start the "firstTime" loading
       }
       
       private function ClosePressed(param1:MouseEvent) : void

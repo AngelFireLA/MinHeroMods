@@ -1,6 +1,13 @@
+# backup of SWF with each run
 /old
-default.swf
+# filename to hash table
 file_changes.csv
+# auto-generated folder for all the modified scripts
 /modified
 Logs - Raccourci.lnk
+# folder created due to vscode
+/.vscode
+# personal note for myself: can be removed if anyone wants to see me natter on lol
+square's notes on modloader system.txt 
+# my other mods that I'll integrate at some point: can be removed if anyone wants to see half-baked mods in different files
 /square_test

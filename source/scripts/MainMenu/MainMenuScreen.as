@@ -450,13 +450,13 @@ package MainMenu
          }
       }
       
-      private function StartBringInAnimation_Part1() : void
+      private function StartBringInAnimation_Part1() : void //the camrea panning down
       {
          var _loc1_:TimelineLite = new TimelineLite();
          _loc1_.append(new TweenLite(this.m_fullBlackOverlay,0.5,{"onComplete":this.StartTheBackgroundMovement}));
          _loc1_.append(new TweenLite(this.m_fullBlackOverlay,1.5,{"alpha":0}));
          _loc1_ = new TimelineLite();
-         _loc1_.append(new TweenLite(this,1.9,{"onComplete":this.StartBringInAnimation_Part2}));
+         _loc1_.append(new TweenLite(this,1.9,{"onComplete":this.StartBringInAnimation_Part2})); //start the second part, the loading of the assets
       }
       
       private function StartTheBackgroundMovement() : void
@@ -464,7 +464,7 @@ package MainMenu
          this.m_currState = MainMenuStates.MAIN_MENU_ANIMATING;
       }
       
-      private function StartBringInAnimation_Part2() : void
+      private function StartBringInAnimation_Part2() : void //Loads in all of the MainMenuScreen
       {
          this.m_titleIcon.alpha = 0;
          this.m_titleIcon.y -= 50;
@@ -518,7 +518,7 @@ package MainMenu
          _loc3_.append(new TweenLite(this.m_hostGamesButton,0.8,{"alpha":1}));
          _loc3_ = new TimelineLite();
          _loc3_.append(new TweenLite(this.m_tcGamesButton,2.7,{}));
-         _loc3_.append(new TweenLite(this.m_tcGamesButton,0.8,{
+         _loc3_.append(new TweenLite(this.m_tcGamesButton,0.8,{  //funnily enough, this determines the "FinishBringingInAnimation"
             "alpha":1,
             "onComplete":this.FinishBringInAnimation
          }));
@@ -535,11 +535,11 @@ package MainMenu
          this.m_currState = MainMenuStates.MAIN_MENU_TITLE_SCREEN;
       }
       
-      private function SkipButtonPressed(param1:MouseEvent) : void
+      private function SkipButtonPressed(param1:MouseEvent) : void  //tutorial creation beyond skip
       {
-         TweenLite.killTweensOf(this);
-         Singleton.dynamicData.LoadData(Singleton.dynamicData.m_saveSlot);
-         this.AddInitialMinions();
+         TweenLite.killTweensOf(this); //stop rendering everything lol
+         Singleton.dynamicData.LoadData(Singleton.dynamicData.m_saveSlot); //load data
+         this.AddInitialMinions(); //initial minions
          Singleton.utility.m_screenControllers.SetSceneTo(GameState.TOP_DOWN_SCREEN,true,0.5);
          Singleton.utility.m_soundController.FadeCurrentMusic(0.1,0.8);
       }
@@ -649,7 +649,7 @@ package MainMenu
          _loc2_.append(new TweenLite(param1,0.1,{"x":"-1"}));
       }
       
-      public function StartTheEnterGameForTheFirstTimeAnimaiton() : void
+      public function StartTheEnterGameForTheFirstTimeAnimaiton() : void //anination when starting the game for the first time
       {
          var _loc3_:TimelineLite = null;
          Singleton.utility.m_stage.addEventListener(MouseEvent.CLICK,this.CheckToActivateSkipButton);
@@ -766,7 +766,7 @@ package MainMenu
             "onCompleteParams":[this.m_textSet4]
          }));
          _loc3_.append(new TweenLite(this,10.05,{
-            "onComplete":Singleton.dynamicData.LoadData,
+            "onComplete":Singleton.dynamicData.LoadData, //text fade leads to loading data
             "onCompleteParams":[Singleton.dynamicData.m_saveSlot]
          }));
          _loc3_.append(new TweenLite(this,0.05,{"onComplete":this.AddInitialMinions}));
@@ -831,7 +831,7 @@ package MainMenu
          }));
       }
       
-      private function AddInitialMinions() : void
+      private function AddInitialMinions() : void //adding the starter minions. 
       {
          Singleton.utility.m_stage.removeEventListener(MouseEvent.CLICK,this.CheckToActivateSkipButton);
          this.m_skipIntroButton.alpha = 0;

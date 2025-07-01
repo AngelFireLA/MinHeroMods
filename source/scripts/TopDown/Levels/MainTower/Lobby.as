@@ -2,12 +2,9 @@ package TopDown.Levels.MainTower
 {
    import Minions.OwnedMinion;
    import States.MinionDexID;
-   import TopDown.LevelObjects.BaseInGameInteractionObject;
    import TopDown.LevelObjects.ButtonZone;
    import TopDown.LevelObjects.ChatBox.StandardChatBox;
    import TopDown.LevelObjects.MainChar;
-   import TopDown.LevelObjects.RoomTransitionEntryPointObject;
-   import TopDown.LevelObjects.RoomTransitionObject;
    import TopDown.LevelObjects.TitanVisualsForEgg;
    import TopDown.Levels.BaseTopDownLevel;
    import TopDown.Menus.EggeryMinionDetailsObject;
@@ -121,6 +118,12 @@ package TopDown.Levels.MainTower
             {
                _loc2_.BringInWithText("Titan minions are very powerful, you\'ll need all six sage seals and you\'ll need to defeat the Grand Sage before you\'re ready to have this minion.","Titan Guard");
             }
+         }
+         else if(param1 == 5)
+         {
+            _loc2_ = GetChatBoxForButtonZone(param1);
+            _loc2_.SetFunctions();
+            _loc2_.BringInWithText("So, you want to play against others?\nIt\'s not going to be easy...","MultiGuy");
          }
       }
       
@@ -510,8 +513,6 @@ package TopDown.Levels.MainTower
          AddObject("generalRoom_sideTorch",1315,156,-1,1,0);
          AddObject("generalRoom_sideTorch",1739,158,1,1,0);
          AddObject("generalRoom_vipSign",2437.5,821,1,1,0);
-         AddObject("generalRoom_velvetRope",2514,823.5,1,1,0);
-         AddObject("generalRoom_velvetRope",2516,994.5,1,1,0);
          AddObject("generalRoom_sideTorch",1742,1972,1,1,0);
          AddObject("generalRoom_sideTorch",1313,1972,-1,1,0);
          AddObject("generalRoom_bottomTorch",1054,1711.5,1,1,0);
@@ -531,7 +532,6 @@ package TopDown.Levels.MainTower
          AddObject("generalRoom_titanStatue",137.5,686.5,1,1,0);
          AddObject("generalRoom_titanDoorGaurd2",364.5,976,1,1,0);
          AddObject("generalRoom_titanEgg",119.5,876.5,1,1,0);
-         AddObject("generalRoom_velvetRope",2516,1167.5,1,1,0);
          AddObject("generalRoom_titanEggPit_front",111,1113.5,1,1,0);
          AddObject("generalRoom_titanStatue",127.5,1222.5,1,1,0);
          AddObject("generalRoom_titanDoorGaurd1",363.5,1090.5,1,1,0);
@@ -626,7 +626,6 @@ package TopDown.Levels.MainTower
          AddObject("collRect",382,1072.5,0.359954833984375,0.3798065185546875,0);
          AddObject("collRect",2970,835,0.339996337890625,10.88079833984375,0);
          AddObject("collRect",2272.1,1368,7.279022216796875,1,0);
-         AddObject("collRect",2526,838.1,0.190032958984375,10.977783203125,0);
          AddObject("collRect",2445,891,0.44000244140625,0.279998779296875,0);
          AddObject("collRect",1347.05,961.05,3.5076904296875,0.8790283203125,0);
          AddObject("collRect",1312.65,1000.1,4.394866943359375,1.2571868896484375,0);
@@ -639,6 +638,11 @@ package TopDown.Levels.MainTower
          AddObject("menus_speechBubble2",1760,806,1,1,0);
          AddObject("menus_speechBubble1",1033,807,1,1,0);
          AddObject("menus_speechBubble4",302.5,1031.5,1,1,0);
+         // ONLY ENABLE THE BELOW IF MULTI MODE
+         AddObject("menus_speechBubble5",2586,895,1,1,0);
+         AddObject("buttonZoneObject5",2659.2,989.9,1.1326451821,1.1380706946,0);
+         AddObject("generalRoom_hardEnemy",2670.5,977.8,1,1,0);
+         AddObject("collRect",2700.2,1059.3,0.3408389721,0.2573038434,0);
       }
    }
 }
