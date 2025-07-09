@@ -9,6 +9,7 @@ package PresistentData
    import States.ModTypes;
    import TopDown.Trainers.TrainerDataObject;
    import Utilities.Singleton;
+   import Utilities.DataEvent;
    import Utilities.SocketManager;
    import flash.net.SharedObject;
    

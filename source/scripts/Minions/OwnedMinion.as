@@ -8,6 +8,7 @@ package Minions
    import States.StatType;
    import States.TrainerType;
    import Utilities.Singleton;
+   import Utilities.DataEvent;
    import Utilities.SocketManager;
    import com.greensock.TweenLite;
    
