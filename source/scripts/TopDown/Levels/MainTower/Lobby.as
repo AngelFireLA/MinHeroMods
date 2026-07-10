@@ -613,6 +613,7 @@ package TopDown.Levels.MainTower
          AddObject("entryObject_lobbyFromEggery",1500,2062,1,1,0);
          AddObject("elevatorEntrance",1474.5,129,1.723876953125,0.52984619140625,0);
          AddObject("entryObject_startingRoomToLobby",1513,194,1,1,0);
+         AddObject("entryObject_secretSageRoomExit",2890,1033,1,1,0);
          AddObject("collRect",2274,811,7,1,0);
          AddObject("collRect",1311.95,1475.95,0.099609375,0.1999969482421875,0);
          AddObject("collRect",79,761,7.029998779296875,0.5800018310546875,0);
@@ -646,23 +647,10 @@ package TopDown.Levels.MainTower
          //assumed it was a wall
          
 
-         if(!Singleton.dynamicData.m_isMod["iceFloor"])
-         {
-            AddObject("generalRoom_sideDoor",2965.9,1033.15,1,1,0); //add the new side door
-            AddObject("IceFloorEntry",3020,1033.15,1.7238771306,0.529846366,90);
-            AddObject("collRect",2970,835,0.339996337890625,4,0); //split the backing wall for the entrance
-            AddObject("collRect",2970,1170,0.339996337890625,10.88079833984375*0.35,0);
-         }
-         else //otherwise use the blocking tool
-         {
-            AddObject("collRect",2970,835,0.339996337890625,10.88079833984375,0);
-            AddObject("collRect",2526,838.1,0.190032958984375,10.977783203125,0);
-            AddObject("generalRoom_velvetRope",2514,823.5,1,1,0);
-            AddObject("generalRoom_velvetRope",2516,994.5,1,1,0);
-            AddObject("generalRoom_velvetRope",2516,1167.5,1,1,0);
-            AddObject("generalRoom_vipSign",2437.5,800,1,1,0); //was 821, moved back a bit
-            AddObject("collRect",2445,870,0.44000244140625,0.279998779296875,0);
-         }
+         AddObject("generalRoom_sideDoor",2965.9,1033.15,1,1,0);
+         AddObject("roomTransitionObject103",3020,1033.15,1.7238771306,0.529846366,90);
+         AddObject("collRect",2970,835,0.339996337890625,4,0);
+         AddObject("collRect",2970,1170,0.339996337890625,3.8082794189453125,0);
          
       }
    }

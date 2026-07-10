@@ -266,11 +266,11 @@ package TopDown.Levels
          }
          else if(param1 == "elevatorEntrance")
          {
-            this.AddElevatorWallCollObject("roomTransitionObject",param2,param3,param4,param5,param6);
+            this.AddElevatorWallCollObject("roomTransitionObject",param2,param3,param4,param5,param6,"vanilla");
          }
          else if(param1 == "IceFloorEntry") //Ice Floor specific entry object.
          {
-            this.AddElevatorWallCollObject("roomTransitionObject",param2,param3,param4,param5,param6);
+            this.AddElevatorWallCollObject("roomTransitionObject",param2,param3,param4,param5,param6,"icefloor");
          }
          else if(param1 == "regularDoor")
          {
@@ -958,6 +958,20 @@ package TopDown.Levels
             _loc7_ = this.AddRoomTransitionGoToPointObject("entryObject",param2,param3,param4,param5,param6);
             _loc9_ = _loc7_ as RoomTransitionEntryPointObject;
             _loc9_.m_roomComingFrom = SpecialRoom.LOBBY_ELEVATOR;
+         }
+         else if(param1 == "entryObject_secretSageRoom")
+         {
+            _loc7_ = this.AddRoomTransitionGoToPointObject("entryObject",param2,param3,param4,param5,param6);
+            _loc9_ = _loc7_ as RoomTransitionEntryPointObject;
+            _loc9_.m_roomComingFrom = SpecialRoom.SECRET_SAGE_ROOM;
+            this.m_initialDirection = OrientationState.ORIENTATION_UP;
+         }
+         else if(param1 == "entryObject_secretSageRoomExit")
+         {
+            _loc7_ = this.AddRoomTransitionGoToPointObject("entryObject",param2,param3,param4,param5,param6);
+            _loc9_ = _loc7_ as RoomTransitionEntryPointObject;
+            _loc9_.m_roomComingFrom = SpecialRoom.SECRET_SAGE_ROOM_EXIT;
+            this.m_initialDirection = OrientationState.ORIENTATION_LEFT;
          }
          else if(param1.slice(0,11) == "entryObject")
          {

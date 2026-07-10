@@ -4,20 +4,44 @@ package TopDown.Levels.MainTower
    import TopDown.LevelObjects.ButtonZone;
    import TopDown.LevelObjects.RoomTransitionEntryPointObject;
    import TopDown.LevelObjects.RoomTransitionObject;
+   import TopDown.LevelObjects.ChatBox.StandardChatBox;
+   import TopDown.LevelObjects.VisualLevelObject;
    import TopDown.Levels.BaseTopDownLevel;
+   import States.SpecialRoom;
    import Utilities.Singleton;
    
    public class ExpertRoom_fire extends BaseTopDownLevel
    {
+
+      private var m_secretSageVisual:VisualLevelObject;
+
+      private var m_secretRickVisual:VisualLevelObject;
+
+      private var m_hasQuestionedVisitor:Boolean = false;
       
       public function ExpertRoom_fire()
       {
          super();
       }
+
+      override public function LoadSprites() : void
+      {
+         super.LoadSprites();
+         if(Singleton.dynamicData.m_currTransitionID == SpecialRoom.SECRET_SAGE_ROOM)
+         {
+            this.m_hasQuestionedVisitor = false;
+            this.ShowSecretSage();
+         }
+      }
       
       override public function CreateObjects() : void
       {
          var _loc3_:ButtonZone = null;
+         if(Singleton.dynamicData.m_currTransitionID == SpecialRoom.SECRET_SAGE_ROOM)
+         {
+            this.CreateSecretSageRoom();
+            return;
+         }
          m_roomBounds.graphics.beginFill(0);
          m_roomBounds.graphics.drawRect(0,0,695.3,826.55);
          m_roomBounds.graphics.endFill();
@@ -90,6 +114,88 @@ package TopDown.Levels.MainTower
          AddObject("expert_roomTransitionObject",345,517,0.477447509765625,0.477447509765625,0);
          AddObject("menus_speechBubble",232,117.5,1,1,0);
          AddObject("fire_music_override",87,763.5,1,1,0);
+      }
+
+      private function CreateSecretSageRoom() : void
+      {
+         var _loc1_:int = 0;
+         var _loc2_:ButtonZone = null;
+         m_roomBounds.graphics.beginFill(0);
+         m_roomBounds.graphics.drawRect(0,0,695,700);
+         m_roomBounds.graphics.endFill();
+         Singleton.utility.m_screenControllers.m_topDownScreen.m_topDownMovementScreen.m_bottomVisualLayer.addChild(m_roomBounds);
+         _loc1_ = 0;
+         while(_loc1_ < 5)
+         {
+            AddObject("generalRoom_floorTile",53 + _loc1_ * 120,186.5,1,1,0);
+            AddObject("generalRoom_floorTile",53 + _loc1_ * 120,306.5,1,1,0);
+            AddObject("generalRoom_floorTile",53 + _loc1_ * 120,426.5,1,1,0);
+            AddObject("generalRoom_floorTile",53 + _loc1_ * 120,546.5,1,1,0);
+            _loc1_++;
+         }
+         AddObject("generalRoom_upperLeftCorner",5.5,0,1,1,0);
+         AddObject("generalRoom_topWall",136.5,0,1,1,0);
+         AddObject("generalRoom_topWall",337,0,1.15,1,0);
+         AddObject("generalRoom_upperRightCorner",567.5,0,1,1,0);
+         AddObject("generalRoom_sideWall",92.5,229,-1,1.38,0);
+         AddObject("generalRoom_sideWall",611.5,229,1,1.38,0);
+         AddObject("generalRoom_lowerLeftCorner",5,507.5,1,1,0);
+         AddObject("generalRoom_bottomWall",133,605,1.02,1,0);
+         AddObject("generalRoom_bottomWall",339,605,1.14,1,0);
+         AddObject("generalRoom_lowerRightCorner",568,507.5,1,1,0);
+         AddObject("generalRoom_bottomDoor",279,596,1,1,0);
+         AddObject("generalRoom_detailTapestry_fire",288,41,1,1,0);
+         AddObject("generalRoom_candelabra",76,43.5,1,1,0);
+         AddObject("generalRoom_candelabra",537,43.5,1,1,0);
+         AddJustVisualObject("generalRoom_grandWizard",296,220,1,1,0);
+         this.m_secretSageVisual = m_visualObjects[m_visualObjects.length - 1];
+         AddJustVisualObject("generalRoom_hardEnemy",304,222,1,1,0);
+         this.m_secretRickVisual = m_visualObjects[m_visualObjects.length - 1];
+         _loc2_ = AddObject("buttonZoneObject",280,218,1.57,1.81,0) as ButtonZone;
+         _loc2_.m_buttonZoneID = 7;
+         AddObject("collRect",315,301,0.62,0.3,0);
+         AddObject("collRect",59,180,0.32,8.8,0);
+         AddObject("collRect",613,180,0.32,8.8,0);
+         AddObject("collRect",72,169,5.51,0.36,0);
+         AddObject("collRect",82,605,2.35,0.56,0);
+         AddObject("collRect",438,605,1.55,0.56,0);
+         AddObject("entryObject_secretSageRoom",341,525,1,1,0);
+         AddObject("roomTransitionObject104",345,590,0.48,0.48,0);
+         AddObject("menus_speechBubble7",232,150,1,1,0);
+         AddObject("fire_music_override",87,650,1,1,0);
+         this.ShowSecretSage();
+      }
+
+      override protected function PreformButtonAction(param1:int) : void
+      {
+         var _loc1_:StandardChatBox = null;
+         if(Singleton.dynamicData.m_currTransitionID != SpecialRoom.SECRET_SAGE_ROOM || param1 != 7)
+         {
+            super.PreformButtonAction(param1);
+            return;
+         }
+         _loc1_ = GetChatBoxForButtonZone(7);
+         _loc1_.SetFunctions();
+         if(!this.m_hasQuestionedVisitor)
+         {
+            this.m_hasQuestionedVisitor = true;
+            _loc1_.BringInWithText("How did you get in here? That door was never supposed to open.","Grand Sage");
+         }
+         else
+         {
+            this.m_secretSageVisual.m_currSprite.visible = false;
+            this.m_secretRickVisual.m_currSprite.visible = true;
+            _loc1_.BringInWithText("Never gonna give you up... You have been Rickrolled!","Rick Astley");
+         }
+      }
+
+      private function ShowSecretSage() : void
+      {
+         if(this.m_secretSageVisual != null && this.m_secretSageVisual.m_currSprite != null)
+         {
+            this.m_secretSageVisual.m_currSprite.visible = true;
+            this.m_secretRickVisual.m_currSprite.visible = false;
+         }
       }
    }
 }

@@ -10,6 +10,10 @@ package States
       public static const LOBBY_ELEVATOR:int = 101;
       
       public static const TOWER_FLOOR_SELECT:int = 102;
+
+      public static const SECRET_SAGE_ROOM:int = 103;
+
+      public static const SECRET_SAGE_ROOM_EXIT:int = 104;
       
       public function SpecialRoom()
       {
