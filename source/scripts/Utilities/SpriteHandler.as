@@ -2664,6 +2664,126 @@ package Utilities
       
       private static var miniMap_eggeryOverlay:Class = SpriteHandler_miniMap_eggeryOverlay;
       
+      private static var dirtFish:Class = SpriteHandler_dirtFish;
+
+      private static var waterRay1:Class = SpriteHandler_waterRay1;
+
+      private static var waterRay2:Class = SpriteHandler_waterRay2;
+
+      private static var HolyBirb1:Class = SpriteHandler_HolyBirb1;
+
+      private static var HolyBirb2:Class = SpriteHandler_HolyBirb2;
+
+      private static var HolyEye1:Class = SpriteHandler_HolyEye1;
+
+      private static var HolyEye2:Class = SpriteHandler_HolyEye2;
+
+      private static var HolyEye3:Class = SpriteHandler_HolyEye3;
+
+      private static var mainMenu_modMenuBackground:Class = SpriteHandler_mainMenu_modMenuBackground;
+
+      private static var iBricks:Class = SpriteHandler_iBricks;
+      private static var iCarpet1:Class = SpriteHandler_iCarpet1;
+      private static var iCarpet1_shiny:Class = SpriteHandler_iCarpet1_shiny;
+      private static var iCarpet2:Class = SpriteHandler_iCarpet2;
+      private static var iCarpet2_shiny:Class = SpriteHandler_iCarpet2_shiny;
+      private static var icePile:Class = SpriteHandler_icePile;
+      private static var iChunks1:Class = SpriteHandler_iChunks1;
+      private static var iChunks2:Class = SpriteHandler_iChunks2;
+      private static var iConnect:Class = SpriteHandler_iConnect;
+      private static var iConnect_shiny:Class = SpriteHandler_iConnect_shiny;
+      private static var iD1:Class = SpriteHandler_iD1;
+      private static var iD2:Class = SpriteHandler_iD2;
+      private static var iD3:Class = SpriteHandler_iD3;
+      private static var iD4:Class = SpriteHandler_iD4;
+      private static var iDL1:Class = SpriteHandler_iDL1;
+      private static var iDL2:Class = SpriteHandler_iDL2;
+      private static var iDL3:Class = SpriteHandler_iDL3;
+      private static var iDL4:Class = SpriteHandler_iDL4;
+      private static var iDoor_down:Class = SpriteHandler_iDoor_down;
+      private static var iDoor_side:Class = SpriteHandler_iDoor_side;
+      private static var iDoor_top:Class = SpriteHandler_iDoor_top;
+      private static var iDown:Class = SpriteHandler_iDown;
+      private static var iFloor1:Class = SpriteHandler_iFloor1;
+      private static var iFloor2:Class = SpriteHandler_iFloor2;
+      private static var iFloor3:Class = SpriteHandler_iFloor3;
+      private static var iFloor4:Class = SpriteHandler_iFloor4;
+      private static var iFloor5:Class = SpriteHandler_iFloor5;
+      private static var iFloor6:Class = SpriteHandler_iFloor6;
+      private static var iFloor7:Class = SpriteHandler_iFloor7;
+      private static var iFloor8:Class = SpriteHandler_iFloor8;
+      private static var iFloorIcon:Class = SpriteHandler_iFloorIcon;
+      private static var iGrass:Class = SpriteHandler_iGrass;
+      private static var iLLw:Class = SpriteHandler_iLLw;
+      private static var iLLw_generic:Class = SpriteHandler_iLLw_generic;
+      private static var iLRw:Class = SpriteHandler_iLRw;
+      private static var iMammoth1:Class = SpriteHandler_iMammoth1;
+      private static var iMammoth2:Class = SpriteHandler_iMammoth2;
+      private static var iMammoth3:Class = SpriteHandler_iMammoth3;
+      private static var iNPC_baldy:Class = SpriteHandler_iNPC_baldy;
+      private static var iNPC_bluey:Class = SpriteHandler_iNPC_bluey;
+      private static var iNPC_snowy:Class = SpriteHandler_iNPC_snowy;
+      private static var iPath1:Class = SpriteHandler_iPath1;
+      private static var iPath2:Class = SpriteHandler_iPath2;
+      private static var iPath_lowerLeft:Class = SpriteHandler_iPath_lowerLeft;
+      private static var iPath_upperLeft:Class = SpriteHandler_iPath_upperLeft;
+      private static var iPuddle:Class = SpriteHandler_iPuddle;
+      private static var iPuddle2:Class = SpriteHandler_iPuddle2;
+      private static var iPuddle3:Class = SpriteHandler_iPuddle3;
+      private static var iRock2:Class = SpriteHandler_iRock2;
+      private static var iRock3:Class = SpriteHandler_iRock3;
+      private static var iRock_big:Class = SpriteHandler_iRock_big;
+      private static var iRock_small:Class = SpriteHandler_iRock_small;
+      private static var iSage:Class = SpriteHandler_iSage;
+      private static var iSeal1:Class = SpriteHandler_iSeal1;
+      private static var iSeal2:Class = SpriteHandler_iSeal2;
+      private static var iSeal3:Class = SpriteHandler_iSeal3;
+      private static var iSide:Class = SpriteHandler_iSide;
+      private static var iSloth1:Class = SpriteHandler_iSloth1;
+      private static var iSloth2:Class = SpriteHandler_iSloth2;
+      private static var iSloth3:Class = SpriteHandler_iSloth3;
+      private static var iSnowman1:Class = SpriteHandler_iSnowman1;
+      private static var iSnowman2:Class = SpriteHandler_iSnowman2;
+      private static var iThaw:Class = SpriteHandler_iThaw;
+      private static var iThaw2:Class = SpriteHandler_iThaw2;
+      private static var iThaw2_side:Class = SpriteHandler_iThaw2_side;
+      private static var iThawSide:Class = SpriteHandler_iThawSide;
+      private static var iTree1:Class = SpriteHandler_iTree1;
+      private static var iTree1_full:Class = SpriteHandler_iTree1_full;
+      private static var iTree2:Class = SpriteHandler_iTree2;
+      private static var iTree3:Class = SpriteHandler_iTree3;
+      private static var iTree4:Class = SpriteHandler_iTree4;
+      private static var iULw:Class = SpriteHandler_iULw;
+      private static var iULw_generic:Class = SpriteHandler_iULw_generic;
+      private static var iUnicorn1:Class = SpriteHandler_iUnicorn1;
+      private static var iUnicorn2:Class = SpriteHandler_iUnicorn2;
+      private static var iUnicorn3:Class = SpriteHandler_iUnicorn3;
+      private static var iUp:Class = SpriteHandler_iUp;
+      private static var iUp_generic:Class = SpriteHandler_iUp_generic;
+      private static var iURw:Class = SpriteHandler_iURw;
+      private static var iURw_generic:Class = SpriteHandler_iURw_generic;
+      private static var iVat1:Class = SpriteHandler_iVat1;
+      private static var iVat2:Class = SpriteHandler_iVat2;
+      private static var iVat3:Class = SpriteHandler_iVat3;
+      private static var iVat4:Class = SpriteHandler_iVat4;
+      private static var iWater:Class = SpriteHandler_iWater;
+      private static var iWater2:Class = SpriteHandler_iWater2;
+      private static var iWater2Side:Class = SpriteHandler_iWater2Side;
+      private static var iWaterSide:Class = SpriteHandler_iWaterSide;
+      private static var menus_minionType_thaw:Class = SpriteHandler_menus_minionType_thaw;
+      private static var moveDescription_type_thaw:Class = SpriteHandler_moveDescription_type_thaw;
+      private static var moveIcon_iBreath:Class = SpriteHandler_moveIcon_iBreath;
+      private static var moveIcon_iFist:Class = SpriteHandler_moveIcon_iFist;
+      private static var moveIcon_iHorn:Class = SpriteHandler_moveIcon_iHorn;
+      private static var moveIcon_iMelt:Class = SpriteHandler_moveIcon_iMelt;
+      private static var moveIcon_iMicro:Class = SpriteHandler_moveIcon_iMicro;
+      private static var moveIcon_iSland:Class = SpriteHandler_moveIcon_iSland;
+      private static var moveIcon_iStrike:Class = SpriteHandler_moveIcon_iStrike;
+      private static var mv_iBreath:Class = SpriteHandler_mv_iBreath;
+      private static var mv_iFist:Class = SpriteHandler_mv_iFist;
+      private static var mv_iHorn:Class = SpriteHandler_mv_iHorn;
+      private static var mv_iMicro:Class = SpriteHandler_mv_iMicro;
+      private static var mv_iSland:Class = SpriteHandler_mv_iSland;
       private var MAIN_FONT:Class = SpriteHandler_MAIN_FONT;
       
       private var m_currSSIndex:Array;
@@ -2735,12 +2855,12 @@ package Utilities
          var _loc7_:uint = 0;
          var _loc8_:uint = 0;
          var _loc9_:uint = 0;
-         var _loc10_:Number = NaN;
+         var _loc10_:Number = Number(NaN);
          _loc5_ = param1.getPixels(param1.rect);
          _loc6_ = int(_loc5_.length);
          while(true)
          {
-            _loc6_ = _loc6_ - 4;
+            _loc6_ -= 4;
             if(_loc6_ < 0)
             {
                break;
@@ -2779,12 +2899,12 @@ package Utilities
          var _loc7_:uint = 0;
          var _loc8_:uint = 0;
          var _loc9_:uint = 0;
-         var _loc10_:Number = NaN;
+         var _loc10_:Number = Number(NaN);
          _loc5_ = param1.getPixels(param1.rect);
          _loc6_ = int(_loc5_.length);
          while(true)
          {
-            _loc6_ = _loc6_ - 4;
+            _loc6_ -= 4;
             if(_loc6_ < 0)
             {
                break;

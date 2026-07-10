@@ -47,7 +47,7 @@ package
          Singleton.utility.m_mousePointObject.graphics.beginFill(5592405,1);
          Singleton.utility.m_mousePointObject.graphics.drawRect(0,0,1,1);
          Singleton.utility.m_mousePointObject.graphics.endFill();
-         Singleton.utility.m_screenControllers.m_topDownScreen.m_gemShop.CreateNewGems();
+         //Singleton.utility.m_screenControllers.m_topDownScreen.m_gemShop.CreateNewGems();
          TweenPlugin.activate([TransformAroundPointPlugin,ShortRotationPlugin,TransformAroundCenterPlugin,TintPlugin,ColorTransformPlugin,RemoveTintPlugin]);
          Input.initialize(Singleton.utility.m_stage,false);
          Singleton.utility.m_analyticsController.StartAnalytics();
@@ -69,18 +69,20 @@ package
          if(_loc3_)
          {
             MochiBot.track(this,"cfa9e6c8");
+            trace("Tracking with MochiBot")
          }
          this.m_updateLoopCounter = 0;
          Singleton.dynamicData.m_hasBeatenHardMode = false;
          Singleton.dynamicData.ResetOpponentsMinions();
          Singleton.dynamicData.SetHasUnlockedFloor(0,true);
          Singleton.dynamicData.SetHasTutorialBeenSeen(TutorialTypes.TUTORIAL_FOCUS_TARGETS,true);
-         Singleton.dynamicData.m_isAutoSaveOn = true;
-         Singleton.utility.m_screenControllers.SetSceneTo(GameState.SPONSOR_SCREEN,false);
-         Singleton.dynamicData.SetNewReturnToOnDeathPoint();
+         Singleton.dynamicData.m_isAutoSaveOn = false;
+         Singleton.utility.m_screenControllers.SetSceneTo(GameState.MAIN_MENU,false);
+         //Singleton.dynamicData.SetNewReturnToOnDeathPoint(); //was commented
          addEventListener(Event.ENTER_FRAME,this.Update);
          stage.addEventListener(MouseEvent.CLICK,this.GlobalMouseClicked);
          stage.addEventListener(MouseEvent.MOUSE_MOVE,this.GlobalMouseMovement);
+         trace("Main file inited")
       }
       
       public function CallGlobalMouseMovement() : void
@@ -220,15 +222,6 @@ package
          }
       }
       
-      private function TestGotoBattleScreen() : void
-      {
-         Singleton.utility.m_screenControllers.SetSceneTo(GameState.BATTLE_SCREEN);
-      }
-      
-      private function TestGotoTopDownScreen() : void
-      {
-         Singleton.utility.m_screenControllers.SetSceneTo(GameState.TOP_DOWN_SCREEN);
-      }
       
       private function CreateFromSnapShot() : void
       {

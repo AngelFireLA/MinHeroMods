@@ -3,12 +3,14 @@ package PresistentData
    import Minions.OwnedMinion;
    import SharedObjects.Gems.OwnedGem;
    import States.BackgroundMusicTracks;
-   import States.MinionDexID;
    import States.OrientationState;
    import States.TutorialTypes;
    import TopDown.Trainers.TrainerDataObject;
+   import Utilities.DataEvent;
    import Utilities.Singleton;
+   import Utilities.SocketManager;
    import flash.net.SharedObject;
+   import flash.utils.Dictionary;
    
    public class DynamicData
    {
@@ -137,6 +139,12 @@ package PresistentData
       
       public var m_isExtraSponsorMinionEarned:Boolean;
       
+      public var m_isMod:Dictionary;
+      
+      private var socketManager:SocketManager;
+
+      public var m_FloorType:String; //I am going to make this decide what floors are loaded
+      
       public function DynamicData()
       {
          super();
@@ -176,18 +184,291 @@ package PresistentData
          this.m_starUpgradeAmounts = new Vector.<int>(8);
          this.m_isMapUnlocked = new Vector.<Boolean>(Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER);
          this.m_hasTutorialsBeenSeen = new Vector.<Boolean>(TutorialTypes.NUM_OF_TUTORIALS);
-         this.m_minionsOwned = new Vector.<Boolean>(MinionDexID.TOTAL_NUM_OF_MINIONS - 4);
-         this.m_minionsSeen = new Vector.<Boolean>(MinionDexID.TOTAL_NUM_OF_MINIONS - 4);
          this.m_ownedGems = new Vector.<OwnedGem>(1485);
-         Singleton.staticData.CreateObjectsAfterDynamicData();
          this.LoadInitialData();
-         this.LoadData(this.m_saveSlot);
+         this.LoadData(this.m_saveSlot,false);
          this.m_isTalentTreeInSimpleMode = false;
          this.m_isInMysteryMode = false;
          this.m_isMovementTutorialActive = false;
          this.m_movementTutorialStepCounter = 0;
          this.m_numberOfDeathsSinceVictory = 0;
          this.m_numOfAvailbleStars = 1000;
+         trace("Creating initial mod profile")
+         this.m_isMod = new Dictionary();
+         var i:int = 0;
+         while(i < Singleton.staticData.m_all_mods.length)
+         {
+            this.m_isMod[Singleton.staticData.m_all_mods[i]] = false;
+            i++;
+         }
+         trace("Done initial mod profile")
+      }
+      
+      private function onDataReceived(event:DataEvent) : void
+      {
+         var data:String = event.data;
+         parseAnyData(data);
+      }
+      
+      private function parseAnyData(data:String) : *
+      {
+         var dataArray:Array = data.split("$$");
+         var the_type:String = dataArray.shift();
+         switch(the_type)
+         {
+            case "replaceCurrentTeam":
+               var i:int = 0;
+               while(i < dataArray.length)
+               {
+                  if(dataArray[i] != "")
+                  {
+                     m_ownedMinions[i] = parseMinionData(dataArray[i]);
+                  }
+                  i++;
+               }
+         }
+      }
+      
+      private function parseMinionData(data:String) : OwnedMinion
+      {
+         var minionData:Array = data.split("|");
+         var minion:OwnedMinion = new OwnedMinion(0);
+         var i:int = 0;
+         while(i < minionData.length)
+         {
+            var keyValue:Array = minionData[i].split("§");
+            var key:String = keyValue[0];
+            var value:String = keyValue[1];
+            switch(key)
+            {
+               case "minionID":
+                  minion.minionID = int(value);
+                  break;
+               case "minionDexID":
+                  minion.m_minionDexID = int(value);
+                  break;
+               case "minionName":
+                  minion.m_minionName = value.replace(/\"/g,"");
+                  break;
+               case "isPlayersMinion":
+                  minion.m_isPlayersMinion = value == "true";
+                  break;
+               case "trainerType":
+                  minion.m_trainerType = int(value);
+                  break;
+               case "statBonus":
+                  minion.m_statBonus = int(value);
+                  break;
+               case "currHealthStat":
+                  minion.currHealthStat = int(value);
+                  break;
+               case "currEnergyStat":
+                  minion.currEnergyStat = int(value);
+                  break;
+               case "currAttackStat":
+                  minion.currAttackStat = int(value);
+                  break;
+               case "currHealingStat":
+                  minion.currHealingStat = int(value);
+                  break;
+               case "currSpeedStat":
+                  minion.currSpeedStat = int(value);
+                  break;
+               case "currentExp":
+                  minion.m_currentExp = int(value);
+                  break;
+               case "trainedMove":
+                  minion.m_trainedMove = int(value);
+                  break;
+               case "IVs":
+                  minion.m_IVs = parseList(value,"~");
+                  break;
+               case "gems":
+                  minion.m_gems = parseGems(value);
+                  break;
+               case "currHealth":
+                  minion.currHealth = int(value);
+                  break;
+               case "currEnergy":
+                  minion.currEnergy = int(value);
+                  break;
+               case "currShield":
+                  minion.currShield = int(value);
+                  break;
+               case "maxShield":
+                  minion.maxShield = int(value);
+                  break;
+               case "isBattleModShieldActive":
+                  minion.m_isBattleModShieldActive = value == "true";
+                  break;
+               case "isExtraBattleModMinion":
+                  minion.m_isExtraBattleModMinion = value == "true";
+                  break;
+               case "currExhaust":
+                  minion.m_currExhaust = int(value);
+                  break;
+               case "currStatStages":
+                  minion.m_currStatStages = parseList(value,"~");
+                  break;
+               case "moveOrderPosition":
+                  minion.m_moveOrderPosition = int(value);
+                  break;
+               case "hasMovedOnThisTurn":
+                  minion.m_hasMovedOnThisTurn = value == "true";
+                  break;
+               case "isFrozen":
+                  minion.m_isFrozen = value == "true";
+                  break;
+               case "turnsFrozen":
+                  minion.m_turnsFrozen = int(value);
+                  break;
+               case "isStunned":
+                  minion.m_isStunned = value == "true";
+                  break;
+               case "currChargeMove":
+                  minion.m_currChargeMove = value.replace(/\"/g,"");
+                  break;
+               case "chargeAlliesItHits":
+                  minion.m_chargeAlliesItHits = parseList(value,"~");
+                  break;
+               case "chargeEnemiesItHits":
+                  minion.m_chargeEnemiesItHits = parseList(value,"~");
+                  break;
+               case "currCharge":
+                  minion.m_currCharge = int(value);
+                  break;
+               case "currLevel":
+                  minion.m_currLevel = int(value);
+                  break;
+               case "currExpPercentageToNextLevel":
+                  minion.m_currExpPercentageToNextLevel = Number(value);
+                  break;
+               case "allMoves":
+                  minion.allMoves = parseList(value,"~");
+                  break;
+               case "activeMoves":
+                  minion.m_activeMoves = parseList(value,"~");
+                  break;
+               case "globalMoves":
+                  minion.m_globalMoves = parseList(value,"~");
+                  break;
+               case "availableTalentPoints":
+                  minion.m_availableTalentPoints = int(value);
+                  break;
+               case "currHealthPercentage":
+                  minion.m_currHealthPercentage = Number(value);
+                  break;
+               case "currEnergyPercentage":
+                  minion.m_currEnergyPercentage = Number(value);
+                  break;
+               case "maxHealthStat":
+                  minion.m_maxHealthStat = int(value);
+                  break;
+               case "maxEnergyStat":
+                  minion.m_maxEnergyStat = int(value);
+                  break;
+               case "maxAttackStat":
+                  minion.m_maxAttackStat = int(value);
+                  break;
+               case "maxHealingStat":
+                  minion.m_maxHealingStat = int(value);
+                  break;
+               case "currCritChance":
+                  minion.m_currCritChance = Number(value);
+                  break;
+               case "currArmorModRate":
+                  minion.m_currArmorModRate = Number(value);
+                  break;
+               case "currReflectDamagePercentage":
+                  minion.m_currReflectDamagePercentage = Number(value);
+                  break;
+               case "currRedirectDamage":
+                  minion.m_currRedirectDamage = Number(value);
+                  break;
+            }
+            i++;
+         }
+         return minion;
+      }
+      
+      private function parseList(data:String, separator:String) : Vector.<int>
+      {
+         var elements:Array = data.split(separator);
+         var list:Vector.<int> = new Vector.<int>();
+         var i:int = 0;
+         while(i < elements.length)
+         {
+            list.push(int(elements[i]));
+            i++;
+         }
+         return list;
+      }
+      
+      private function parseGems(data:String) : Vector.<OwnedGem>
+      {
+         var gemsData:Array = data.split("~");
+         var gems:Vector.<OwnedGem> = new Vector.<OwnedGem>(4);
+         var i:int = 0;
+         while(i < gemsData.length)
+         {
+            if(gemsData[i] == "null")
+            {
+               gems[i] = null;
+            }
+            else
+            {
+               gems[i] = parseGem(gemsData[i]);
+            }
+            i++;
+         }
+         return gems;
+      }
+      
+      private function parseGem(data:String) : OwnedGem
+      {
+         var gemData:Array = data.split("&");
+         var gem:OwnedGem = new OwnedGem();
+         var i:int = 0;
+         while(i < gemData.length)
+         {
+            var keyValue:Array = gemData[i].split("#");
+            var key:String = keyValue[0];
+            var value:String = keyValue[1];
+            switch(key)
+            {
+               case "tier":
+                  gem.m_tier = int(value);
+                  break;
+               case "health":
+                  gem.rawStats[StatType.STAT_HEALTH] = Number(value);
+                  break;
+               case "energy":
+                  gem.rawStats[StatType.STAT_ENERGY] = Number(value);
+                  break;
+               case "attack":
+                  gem.rawStats[StatType.STAT_ATTACK] = Number(value);
+                  break;
+               case "healing":
+                  gem.rawStats[StatType.STAT_HEALING] = Number(value);
+                  break;
+               case "speed":
+                  gem.rawStats[StatType.STAT_SPEED] = Number(value);
+                  break;
+               case "facetPositions":
+                  gem.m_facetPositions = parseList(value,":");
+                  break;
+            }
+            i++;
+         }
+         return gem;
+      }
+      
+      private function sendData(data:String) : void
+      {
+         if(!socketManager.isEnabled)
+         {
+            socketManager.sendData(data);
+         }
       }
       
       public function get m_currRoomOfTower() : int
@@ -785,14 +1066,14 @@ package PresistentData
          return _loc2_;
       }
       
-      public function HealAllOfAPlayersInPartyMinions() : void
+      public function HealAllOfAPlayersInPartyMinions(bypass:Boolean = false) : void
       {
          var _loc1_:int = 0;
          while(_loc1_ < 5)
          {
             if(this.m_ownedMinions[_loc1_] != null)
             {
-               this.m_ownedMinions[_loc1_].ReFillHealthAndEnergy();
+               this.m_ownedMinions[_loc1_].ReFillHealthAndEnergy(bypass);
             }
             _loc1_++;
          }
@@ -1034,6 +1315,7 @@ package PresistentData
       
       public function SaveAllData(param1:int) : void
       {
+         trace("Saving data for slot: " + param1);
          var _loc5_:int = 0;
          this.m_sharedObject = SharedObject.getLocal("TCrpgSaveSlot" + param1);
          this.SaveValue("m_topDownCharPositionX");
@@ -1124,13 +1406,28 @@ package PresistentData
          {
             if(this.m_ownedMinions[_loc2_] != null)
             {
-               this.m_ownedMinions[_loc2_].SaveMinionAtSlot(_loc2_);
+               this.m_ownedMinions[_loc2_].SaveMinionAtSlot(_loc2_); //always save the minion data: splits by DexID
+               if(this.m_ownedMinions[_loc2_].ModName!="Vanilla") //if non-vanilla: using ModName attribute
+               {
+                  trace("Saving data for minion: " + this.m_ownedMinions[_loc2_].ModName);
+                  Singleton.dynamicData.m_sharedObject.data["minion" + _loc2_ + "ModName"] = this.m_ownedMinions[_loc2_].ModName; //Save the modname
+               }
+               else //if vanilla minion
+               {
+                  Singleton.dynamicData.m_sharedObject.data["minion" + _loc2_ + "dexID"] = this.m_ownedMinions[_loc2_].m_minionDexID; //save the DexID
+               }
             }
             else
             {
                this.m_sharedObject.data["minion" + _loc2_] = false;
             }
             _loc2_++;
+         }
+         var i:int = 0;
+         while(i < Singleton.staticData.m_all_mods.length)
+         {
+            this.SaveValue("m_isMod",i); //passing index as SaveValue adjusts that to m_all_mods
+            i++;
          }
          this.m_sharedObject.flush();
          this.m_sharedObject = SharedObject.getLocal("TCrpgInitialData");
@@ -1146,9 +1443,9 @@ package PresistentData
          this.m_sharedObject = SharedObject.getLocal("TCrpgSaveSlot" + param1);
       }
       
-      public function LoadData(param1:int) : void
+      public function LoadData(param1:int, param2:Boolean) : void
       {
-         var _loc5_:int = 0;
+         var _loc6_:int = 0;
          if(this.m_resetSaveData)
          {
             SharedObject.getLocal("TCrpgSaveSlot0").clear();
@@ -1180,58 +1477,76 @@ package PresistentData
          this.SetInitialValue("_currSettingMinionID",0);
          this.SetInitialValue("m_areTutorialsOn",true);
          this.SetInitialValue("m_graphicsLevel",2);
-         var _loc2_:int = 0;
-         while(_loc2_ < this.m_starUpgradeAmounts.length)
-         {
-            this.SetInitialValue("m_starUpgradeAmounts",0,_loc2_);
-            _loc2_++;
-         }
          var _loc3_:int = 0;
-         while(_loc3_ < this.m_currTrainerStarCounts.length)
+         while(_loc3_ < this.m_starUpgradeAmounts.length)
          {
-            _loc5_ = 0;
-            while(_loc5_ < this.m_currTrainerStarCounts[_loc3_].length)
-            {
-               this.SetInitialValue("m_currTrainerStarCounts",0,_loc3_,_loc5_);
-               this.SetInitialValue("m_bestTrainerStarCounts",0,_loc3_,_loc5_);
-               this.SetInitialValue("m_hasBeatenTrainer",false,_loc3_,_loc5_);
-               _loc5_++;
-            }
+            this.SetInitialValue("m_starUpgradeAmounts",0,_loc3_);
             _loc3_++;
          }
-         _loc2_ = 0;
-         while(_loc2_ < Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER + Singleton.staticData.NUM_OF_FLOORS_IN_THE_HARD_TOWER)
-         {
-            this.SetInitialValue("m_hasBeatenFloor",false,_loc2_);
-            _loc2_++;
-         }
          var _loc4_:int = 0;
-         while(_loc4_ < 4)
+         while(_loc4_ < this.m_currTrainerStarCounts.length)
          {
-            this.SetInitialValue("m_animateNewFloorActive",false,_loc4_);
+            _loc6_ = 0;
+            while(_loc6_ < this.m_currTrainerStarCounts[_loc4_].length)
+            {
+               this.SetInitialValue("m_currTrainerStarCounts",0,_loc4_,_loc6_);
+               this.SetInitialValue("m_bestTrainerStarCounts",0,_loc4_,_loc6_);
+               this.SetInitialValue("m_hasBeatenTrainer",false,_loc4_,_loc6_);
+               _loc6_++;
+            }
             _loc4_++;
          }
          _loc3_ = 0;
-         while(_loc3_ < this.m_hasTutorialsBeenSeen.length)
+         while(_loc3_ < Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER + Singleton.staticData.NUM_OF_FLOORS_IN_THE_HARD_TOWER)
          {
-            this.SetInitialValue("m_hasTutorialsBeenSeen",false,_loc3_);
+            this.SetInitialValue("m_hasBeatenFloor",false,_loc3_);
             _loc3_++;
          }
-         _loc3_ = 0;
-         while(_loc3_ < this.m_isMapUnlocked.length)
+         var _loc5_:int = 0;
+         while(_loc5_ < 4)
          {
-            this.SetInitialValue("m_isMapUnlocked",false,_loc3_);
-            _loc3_++;
-         }
-         _loc5_ = 0;
-         while(_loc5_ < this.m_minionsOwned.length)
-         {
-            this.SetInitialValue("m_minionsOwned",false,_loc5_);
-            this.SetInitialValue("m_minionsSeen",false,_loc5_);
+            this.SetInitialValue("m_animateNewFloorActive",false,_loc5_);
             _loc5_++;
          }
+         _loc4_ = 0;
+         while(_loc4_ < this.m_hasTutorialsBeenSeen.length)
+         {
+            this.SetInitialValue("m_hasTutorialsBeenSeen",false,_loc4_);
+            _loc4_++;
+         }
+         _loc4_ = 0;
+         while(_loc4_ < this.m_isMapUnlocked.length)
+         {
+            this.SetInitialValue("m_isMapUnlocked",false,_loc4_);
+            _loc4_++;
+         }
+         if(param2)
+         {
+            _loc6_ = 0;
+            while(_loc6_ < Singleton.staticData.m_all_mods.length)
+            {
+               this.SetInitialValue("m_isMod",Singleton.staticData.m_all_mods[_loc6_]);
+               _loc6_++;
+            }
+            trace("dynamicData has the following mod configuration:");
+            for (var k:Object in this.m_isMod) {
+               var value:Boolean = this.m_isMod[k];
+               var key:String = k;
+               trace(" - " + key + ": " + value);
+            }
+            Singleton.staticData.CreateFinalInitialThings(this.m_isMod);
+            this.m_minionsOwned = new Vector.<Boolean>(Singleton.staticData.m_TOTAL_MINIONS);
+            this.m_minionsSeen = new Vector.<Boolean>(Singleton.staticData.m_TOTAL_MINIONS);
+            _loc6_ = 0;
+            while(_loc6_ < this.m_minionsOwned.length)
+            {
+               this.SetInitialValue("m_minionsOwned",false,_loc6_);
+               this.SetInitialValue("m_minionsSeen",false,_loc6_); //this defaults them to True
+               _loc6_++;
+            }
+            this.LoadMinions();
+         }
          this.LoadGems();
-         this.LoadMinions();
       }
       
       private function LoadGems() : void
@@ -1249,16 +1564,25 @@ package PresistentData
          }
       }
       
-      private function LoadMinions() : void
+      private function LoadMinions() : void //Loads the minion data
       {
          this.m_ownedMinions = new Vector.<OwnedMinion>(200);
          var _loc1_:int = 0;
          while(_loc1_ < this.m_ownedMinions.length)
          {
-            if(this.m_sharedObject.data["minion" + _loc1_] != null && Boolean(this.m_sharedObject.data["minion" + _loc1_]))
+            if(this.m_sharedObject.data["minion" + _loc1_] != null && Boolean(this.m_sharedObject.data["minion" + _loc1_])) //if the minion exists and data exists for it
             {
-               this.m_ownedMinions[_loc1_] = new OwnedMinion(Singleton.dynamicData.m_sharedObject.data["minion" + _loc1_ + "dexID"]);
-               this.m_ownedMinions[_loc1_].CreateMinionFromSlot(_loc1_);
+               if(String("minion" + _loc1_ + "ModName") in this.m_sharedObject.data) //if the modname exists: won't exist with vanilla
+               {
+                  trace("Loading modded minion: " + this.m_sharedObject.data["minion" + _loc1_ + "ModName"] + " with virtual DexID of "+ Singleton.staticData.ModToDexID[this.m_sharedObject.data["minion" + _loc1_ + "ModName"]]);
+                  this.m_ownedMinions[_loc1_] = new OwnedMinion(Singleton.staticData.ModToDexID[this.m_sharedObject.data["minion" + _loc1_ + "ModName"]]); //creates a new ownedMinion by converting the ModName into a DexID
+                  this.m_ownedMinions[_loc1_].CreateMinionFromSlot(_loc1_,Singleton.staticData.ModToDexID[this.m_sharedObject.data["minion" + _loc1_ + "ModName"]]); //then makes sure the DexID is right by using our custom one
+               }
+               else //otherwise, use the normal DexID as needed
+               {
+                  this.m_ownedMinions[_loc1_] = new OwnedMinion(Singleton.dynamicData.m_sharedObject.data["minion" + _loc1_ + "dexID"]);
+                  this.m_ownedMinions[_loc1_].CreateMinionFromSlot(_loc1_,1);
+               } 
             }
             _loc1_++;
          }
@@ -1288,7 +1612,27 @@ package PresistentData
       
       private function SetInitialValue(param1:String, param2:Object, param3:int = -99, param4:int = -99) : void
       {
-         if(param3 == -99)
+         if(param1 == "m_isMod")
+         {
+            if(param2=="BMod 1"||param2=="BMod 2"||param2=="BMod 3") //if said mod is a BMod
+            {
+               this["m_isMod"][param2] = true; //defaults to True, always (it's a BMod)
+            }
+            else //otherwise, follow standard mod config procedure
+            {
+               if(this.m_sharedObject.data["m_isMod_" + param2] != null)
+               {
+                  this["m_isMod"][param2] = this.m_sharedObject.data["m_isMod_" + param2];
+                  trace("Detected mod config for " + param2 + ", using " + this.m_sharedObject.data["m_isMod_" + param2])
+               }
+               else
+               {
+                  trace("FIRST TIME CREATION!")
+                  trace("Using mod menu mod config for " + param2 + ", using "+ this.m_isMod[param2])
+               }
+            }
+         }
+         else if(param3 == -99)
          {
             if(this.m_sharedObject.data[param1] != null)
             {
@@ -1325,7 +1669,11 @@ package PresistentData
       
       private function SaveValue(param1:String, param2:int = -99, param3:int = -99) : void
       {
-         if(param2 == -99)
+         if(param1 =="m_isMod")
+         {
+            this.m_sharedObject.data["m_isMod_" + String(Singleton.staticData.m_all_mods[param2])] = this.m_isMod[Singleton.staticData.m_all_mods[param2]];
+         }
+         else if(param2 == -99)
          {
             this.m_sharedObject.data[param1] = this[param1];
          }

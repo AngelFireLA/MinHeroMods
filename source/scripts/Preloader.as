@@ -305,7 +305,7 @@ package
          this.m_versionText.y = 503;
          this.m_versionText.width = 80;
          this.m_versionText.defaultTextFormat = _loc1_;
-         this.m_versionText.text = "v1.01";
+         this.m_versionText.text = "v2 MOD";
          addChild(this.m_versionText);
          TweenNano.to(this.m_charAnimaiton,1.8,{
             "delay":0.5,

@@ -77,7 +77,7 @@ package MainMenu
          this.m_enterNameText.border = true;
          this.m_enterNameText.background = true;
          this.m_enterNameText.backgroundColor = 14474460;
-         this.m_enterNameText.restrict = "0-9 a-z A-Z";
+         this.m_enterNameText.restrict = "0-9 a-z A-Z"; //restricting the possible entrants for name
          this.m_enterNameText.maxChars = 10;
          this.m_enterNameText.text = "Ryder";
          addChild(this.m_enterNameText);
@@ -150,7 +150,7 @@ package MainMenu
       {
          Singleton.dynamicData.SetCharName(Singleton.dynamicData.m_saveSlot,this.m_enterNameText.text);
          Singleton.dynamicData.SetIsSaveSlotInUse(Singleton.dynamicData.m_saveSlot,true);
-         Singleton.utility.m_screenControllers.m_mainMenuScreen.StartTheEnterGameForTheFirstTimeAnimaiton();
+         Singleton.utility.m_screenControllers.m_mainMenuScreen.StartTheEnterGameForTheFirstTimeAnimaiton(); //after creating the character, start the "firstTime" loading
       }
       
       private function ClosePressed(param1:MouseEvent) : void

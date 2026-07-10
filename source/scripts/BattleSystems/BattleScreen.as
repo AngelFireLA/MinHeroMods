@@ -199,7 +199,7 @@ package BattleSystems
          var _loc3_:TrainerDataObject = Singleton.dynamicData.m_currTrainerData;
          if(_loc3_.IsModActive(ModStoneTypes.MOD_STONE_MOVE_TIMER))
          {
-            this.m_minionForMoveTimerMod = new OwnedMinion(MinionDexID.DEX_ID_battleModMinion_1 + _loc3_.m_movePower,false);
+            this.m_minionForMoveTimerMod = new OwnedMinion(Singleton.staticData.ModToDexID["BMod 1"] + _loc3_.m_movePower,false);
             this.m_minionForMoveTimerMod.SetLevel(Singleton.dynamicData.m_opponentsMinions[0].m_currLevel);
             this.m_minionForMoveTimerMod.CalculateCurrStats();
             this.m_minionForMoveTimerMod.ReFillHealthAndEnergy();

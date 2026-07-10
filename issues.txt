@@ -1,0 +1,36 @@
+All the issues that currently plague the SWF will be detailed here:
+
+* "ArgumentError: Error #2025: The supplied DisplayObject must be a child of the caller."
+  * When using "Skip" button
+  * From activation of TopDownMovementScreen
+  * Caused by m_roomBounds not being present in m_bottomVisualLayer of m_topDownMovementScreen
+  * TO FIX: research how the hail does the roomBounds work, as there must be some kind of triggering thing that got missed....
+  * Also an issue when loading into the same save file after exiting again.
+
+* Zooms into the main menu door when exiting a save file (occasional)
+  * then errors as above
+  * Seems to possibly be caused by the glowing effect around the dorr not existing during animation
+
+***
+SecurityError: Error #2148: SWF file file:///D|/Min%20HEROOO/MinHeroMods/default.swf cannot access local resource 0. Only local-with-filesystem and trusted local SWF files may access local resources.
+	at global/flash.net::navigateToURL()
+	at TopDown::TopDownMovementScreen/timerHandler()
+	at flash.utils::Timer/_timerDispatch()
+	at flash.utils::Timer/tick()
+***
+* Caused by idling on character creation screen
+
+*** When speeding, replays the fade out.
+
+VANILLA ISSUES (can be "ignored" due to niche case, solvability in-game, or quirk of Flash)
+
+* When exiting a first-time created save slot but still within the tutorial courtyard, immediately plays the entry animation after returning to main menu screen
+  * This bricks the game and prevents the save from being created (sometimes).
+  * probably a result of test code when loading in triggering
+
+* When loading into a level, might get teleported to 0,0 outside the map. 
+ * Have to approach exit from other side to fix: a hassle
+
+
+
+

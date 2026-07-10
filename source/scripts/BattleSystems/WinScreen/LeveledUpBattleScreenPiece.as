@@ -129,6 +129,7 @@ package BattleSystems.WinScreen
          this.m_settingLevel = param2;
          this.m_minionNameText.text = param1.m_minionName;
          this.m_minionLevelText.text = "lv." + param2;
+         param1.m_currHealth = param1.m_currHealth + param1.CalculateHealthStat(param2 + 1) - param1.CalculateHealthStat(param2);
          this.m_statsForCurrLevel[0] = param1.CalculateHealthStat(param2);
          this.m_statsForNextLevel[0] = param1.CalculateHealthStat(param2 + 1);
          this.m_statsForCurrLevel[1] = param1.CalculateEnergyStat(param2);

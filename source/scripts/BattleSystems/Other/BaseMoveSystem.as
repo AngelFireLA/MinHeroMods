@@ -407,7 +407,7 @@ package BattleSystems.Other
       
       private function MoveCurrentMinion() : void
       {
-         if(this.m_currMinion.m_minionDexID == MinionDexID.DEX_ID_battleModMinion_1 || this.m_currMinion.m_minionDexID == MinionDexID.DEX_ID_battleModMinion_2 || this.m_currMinion.m_minionDexID == MinionDexID.DEX_ID_battleModMinion_3)
+         if(this.m_currMinion.m_minionDexID == Singleton.staticData.ModToDexID["BMod 1"] || this.m_currMinion.m_minionDexID == Singleton.staticData.ModToDexID["BMod 2"] || this.m_currMinion.m_minionDexID == Singleton.staticData.ModToDexID["BMod 3"])
          {
             return;
          }

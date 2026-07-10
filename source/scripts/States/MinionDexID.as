@@ -205,17 +205,7 @@ package States
       
       public static const DEX_ID_titan_1:int = 100;
       
-      public static const DEX_ID_titan_2:int = 101;
-      
-      public static const DEX_ID_battleModMinion_1:int = 102;
-      
-      public static const DEX_ID_battleModMinion_2:int = 103;
-      
-      public static const DEX_ID_battleModMinion_3:int = 104;
-      
-      public static const DEX_ID_testing_minion:int = 105;
-
-      public static const TOTAL_NUM_OF_MINIONS:int = 106;
+      public static const DEX_ID_titan_2:int = 101; //the BattleMod IDs are done dynamically     
       
       public function MinionDexID()
       {
@@ -223,4 +213,3 @@ package States
       }
    }
 }
-

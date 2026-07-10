@@ -33,9 +33,7 @@ package States
       
       public static const TYPE_DINO:int = 14;
       
-      public static const NUM_OF_MINION_TYPES:int = 15;
-      
-      public function MinionType()
+      public function MinionType()  //total counter is done in StaticData (only used there)
       {
          super();
       }

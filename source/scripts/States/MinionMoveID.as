@@ -1787,9 +1787,7 @@ package States
       
       public static const purge_t1:int = 891;
       
-      public static const desperation_t1:int = 892;
-      
-      public static const NUM_OF_MOVES:int = 893;
+      public static const desperation_t1:int = 892; //moved NUM_OF_MOVES to staticData + deleted (no use anywhere)
       
       public function MinionMoveID()
       {

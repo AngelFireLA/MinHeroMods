@@ -774,6 +774,10 @@ package Minions.MinionMove
                break;
             case MinionType.TYPE_NORMAL:
                _loc2_ = "moveDescription_type_normal";
+               break;
+            case Singleton.staticData.ModToTypeID["Thaw"]: //for new modded types
+               _loc2_ = "moveDescription_type_thaw"
+               break;
          }
          return _loc2_;
       }

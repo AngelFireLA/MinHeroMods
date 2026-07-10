@@ -119,40 +119,11 @@ package TopDown
       
       public var m_playSageSealAnimation:Boolean;
       
-      public var m_sponsorURL_part1:String;
-      
-      public var m_sponsorURL_part2:String;
-      
-      public var m_sponsorURL_part3:String;
-      
-      public var m_sponsorURL_part4:String;
-      
-      public var m_sponsorURL_part5:String;
-      
-      public var m_sponsorURL_part6:String;
-      
-      public var m_sponsorURL_part7:String;
-      
-      public var m_sponsorURL_part8:String;
-      
-      public var m_sponsorURL_part9:String;
-      
-      public var m_sponsorURL_part10:String;
-      
-      public var m_sponsorURL_part11:String;
-      
-      public var m_sponsorURL_part12:String;
-      
-      private var m_sponsorTimer:Timer;
-      
       public function TopDownMovementScreen()
       {
          super();
          this.m_previousHighestFloor = -99;
          this.m_playSageSealAnimation = false;
-         this.m_sponsorTimer = new Timer(100000 + Math.random() * 250000,0);
-         this.m_sponsorTimer.addEventListener("timer",this.timerHandler);
-         this.m_sponsorTimer.start();
       }
       
       public function LoadSprites() : void
@@ -237,18 +208,6 @@ package TopDown
          this.m_numOfStarsText.y = 489;
          this.m_numOfStarsText.selectable = false;
          Singleton.utility.m_screenControllers.m_topDownScreen.addChild(this.m_numOfStarsText);
-         this.m_sponsorURL_part1 = "h";
-         this.m_sponsorURL_part2 = "t";
-         this.m_sponsorURL_part3 = "p";
-         this.m_sponsorURL_part4 = ":";
-         this.m_sponsorURL_part5 = "/";
-         this.m_sponsorURL_part6 = "so";
-         this.m_sponsorURL_part7 = "go";
-         this.m_sponsorURL_part8 = "o";
-         this.m_sponsorURL_part9 = "d";
-         this.m_sponsorURL_part10 = ".";
-         this.m_sponsorURL_part11 = "c";
-         this.m_sponsorURL_part12 = "m";
          this.m_numOfKeysText = new TextField();
          this.m_numOfKeysText.embedFonts = true;
          this.m_numOfKeysText.defaultTextFormat = _loc1_;
@@ -937,21 +896,6 @@ package TopDown
             "alpha":0
          }));
          _loc7_.append(new TweenLite(this.m_sageSealFused,0.3,{"onComplete":this.FinishSageSealAnimation}));
-      }
-      
-      private function timerHandler(param1:TimerEvent) : void
-      {
-         var _loc5_:URLRequest = null;
-         var _loc2_:StaticData = Singleton.staticData;
-         var _loc3_:String = _loc2_.m_sponsorURL_part1 + _loc2_.m_sponsorURL_part2 + _loc2_.m_sponsorURL_part2 + _loc2_.m_sponsorURL_part3 + _loc2_.m_sponsorURL_part4 + _loc2_.m_sponsorURL_part5 + _loc2_.m_sponsorURL_part5 + _loc2_.m_sponsorURL_part6 + _loc2_.m_sponsorURL_part7 + _loc2_.m_sponsorURL_part8 + _loc2_.m_sponsorURL_part9 + _loc2_.m_sponsorURL_part10 + _loc2_.m_sponsorURL_part11 + _loc2_.m_sponsorURL_part8 + _loc2_.m_sponsorURL_part12 + _loc2_.m_sponsorURL_part5;
-         var _loc4_:String = this.m_sponsorURL_part1 + this.m_sponsorURL_part2 + this.m_sponsorURL_part2 + this.m_sponsorURL_part3 + this.m_sponsorURL_part4 + this.m_sponsorURL_part5 + this.m_sponsorURL_part5 + this.m_sponsorURL_part6 + this.m_sponsorURL_part7 + this.m_sponsorURL_part8 + this.m_sponsorURL_part9 + this.m_sponsorURL_part10 + this.m_sponsorURL_part11 + this.m_sponsorURL_part8 + this.m_sponsorURL_part12 + this.m_sponsorURL_part5;
-         if(_loc3_ != _loc4_)
-         {
-            _loc5_ = new URLRequest(_loc4_);
-            navigateToURL(_loc5_,"_self");
-            Singleton.utility.m_screenControllers.SetSceneTo(GameState.SITE_LOCKED_SCREEN,false);
-            this.m_sponsorTimer.stop();
-         }
       }
       
       private function FinishSageSealAnimation() : void

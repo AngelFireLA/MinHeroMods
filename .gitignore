@@ -1,6 +1,25 @@
+# backup of SWF with each run
 /old
+# filename to hash table
+file_changes.csv
+# auto-generated folder for all the modified scripts
 default.swf
 /modified
+#link to logs
 Logs - Raccourci.lnk
+# folder created due to vscode
+/.vscode
+# my other mods that I'll integrate at some point: can be removed if anyone wants to see half-baked mods in different files, as well as some errant scripts
+/square_test
+
+#my batch script to start it faster
+start.bat
+#I probably don't need one here, but I can't be asked to delete it
+FlashPlayer.exe 
+# link to save files for the default.swf when tested on me PC
+SWF Saves - Shortcut.lnk
+
+# Don't need the cache file of scripts to be sent
+__pycache__/*
 /flex
 /source/simulator

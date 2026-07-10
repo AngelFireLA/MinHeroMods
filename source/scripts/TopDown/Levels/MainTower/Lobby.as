@@ -2,12 +2,9 @@ package TopDown.Levels.MainTower
 {
    import Minions.OwnedMinion;
    import States.MinionDexID;
-   import TopDown.LevelObjects.BaseInGameInteractionObject;
    import TopDown.LevelObjects.ButtonZone;
    import TopDown.LevelObjects.ChatBox.StandardChatBox;
    import TopDown.LevelObjects.MainChar;
-   import TopDown.LevelObjects.RoomTransitionEntryPointObject;
-   import TopDown.LevelObjects.RoomTransitionObject;
    import TopDown.LevelObjects.TitanVisualsForEgg;
    import TopDown.Levels.BaseTopDownLevel;
    import TopDown.Menus.EggeryMinionDetailsObject;
@@ -42,6 +39,9 @@ package TopDown.Levels.MainTower
       
       override protected function PreformButtonAction(param1:int) : void
       {
+         if (Singleton.dynamicData.m_isMod["no_natural_regen"] == true) {
+            Singleton.dynamicData.HealAllOfAPlayersInPartyMinions(true);
+         }
          var _loc2_:StandardChatBox = null;
          var _loc3_:MainChar = Singleton.utility.m_screenControllers.m_topDownScreen.m_topDownMovementScreen.m_mainChar;
          if(_loc3_.m_chatBox.m_isOpen)
@@ -121,6 +121,12 @@ package TopDown.Levels.MainTower
             {
                _loc2_.BringInWithText("Titan minions are very powerful, you\'ll need all six sage seals and you\'ll need to defeat the Grand Sage before you\'re ready to have this minion.","Titan Guard");
             }
+         }
+         else if(param1 == 5)
+         {
+            _loc2_ = GetChatBoxForButtonZone(param1);
+            _loc2_.SetFunctions();
+            _loc2_.BringInWithText("So, you want to play against others?\nIt\'s not going to be easy...","MultiGuy");
          }
       }
       
@@ -482,7 +488,6 @@ package TopDown.Levels.MainTower
          AddObject("generalRoom_blocked_bottomDoor",1452.65,2122.5,1,1,0);
          AddObject("generalRoom_floorTile",1476.7,122.95,0.8842926025390625,0.8842926025390625,0);
          AddObject("generalRoom_lobby_topDoor",1462.3,53.85,1,1,0);
-         AddObject("generalRoom_sideDoor",2965.9,1033.15,1,1,0);
          AddObject("generalRoom_floorRunnerTop",1424.15,1362.15,1,0.939483642578125,0);
          AddObject("generalRoom_floorRunnerMid2",1424.8,1449.3,1,0.847076416015625,0);
          AddObject("generalRoom_floorRunnerMid1",1424.8,1737.7,1,0.939483642578125,0);
@@ -509,9 +514,6 @@ package TopDown.Levels.MainTower
          AddObject("generalRoom_topTorch",1024.5,346.5,1,1,0);
          AddObject("generalRoom_sideTorch",1315,156,-1,1,0);
          AddObject("generalRoom_sideTorch",1739,158,1,1,0);
-         AddObject("generalRoom_vipSign",2437.5,821,1,1,0);
-         AddObject("generalRoom_velvetRope",2514,823.5,1,1,0);
-         AddObject("generalRoom_velvetRope",2516,994.5,1,1,0);
          AddObject("generalRoom_sideTorch",1742,1972,1,1,0);
          AddObject("generalRoom_sideTorch",1313,1972,-1,1,0);
          AddObject("generalRoom_bottomTorch",1054,1711.5,1,1,0);
@@ -531,7 +533,6 @@ package TopDown.Levels.MainTower
          AddObject("generalRoom_titanStatue",137.5,686.5,1,1,0);
          AddObject("generalRoom_titanDoorGaurd2",364.5,976,1,1,0);
          AddObject("generalRoom_titanEgg",119.5,876.5,1,1,0);
-         AddObject("generalRoom_velvetRope",2516,1167.5,1,1,0);
          AddObject("generalRoom_titanEggPit_front",111,1113.5,1,1,0);
          AddObject("generalRoom_titanStatue",127.5,1222.5,1,1,0);
          AddObject("generalRoom_titanDoorGaurd1",363.5,1090.5,1,1,0);
@@ -624,10 +625,7 @@ package TopDown.Levels.MainTower
          AddObject("buttonZoneObject4",376,1004,1,2.0200042724609375,0);
          AddObject("collRect",382,1182.5,0.359954833984375,0.3798065185546875,0);
          AddObject("collRect",382,1072.5,0.359954833984375,0.3798065185546875,0);
-         AddObject("collRect",2970,835,0.339996337890625,10.88079833984375,0);
          AddObject("collRect",2272.1,1368,7.279022216796875,1,0);
-         AddObject("collRect",2526,838.1,0.190032958984375,10.977783203125,0);
-         AddObject("collRect",2445,891,0.44000244140625,0.279998779296875,0);
          AddObject("collRect",1347.05,961.05,3.5076904296875,0.8790283203125,0);
          AddObject("collRect",1312.65,1000.1,4.394866943359375,1.2571868896484375,0);
          AddObject("collRect",1298.15,1056.7,4.59783935546875,2.690399169921875,0);
@@ -639,6 +637,33 @@ package TopDown.Levels.MainTower
          AddObject("menus_speechBubble2",1760,806,1,1,0);
          AddObject("menus_speechBubble1",1033,807,1,1,0);
          AddObject("menus_speechBubble4",302.5,1031.5,1,1,0);
+         // ONLY ENABLE THE BELOW IF MULTI MODE
+         //AddObject("menus_speechBubble5",2586,895,1,1,0);
+         //AddObject("buttonZoneObject5",2659.2,989.9,1.1326451821,1.1380706946,0);
+         //AddObject("generalRoom_hardEnemy",2670.5,977.8,1,1,0);
+         //AddObject("collRect",2700.2,1059.3,0.3408389721,0.2573038434,0);
+         
+         //assumed it was a wall
+         
+
+         if(!Singleton.dynamicData.m_isMod["iceFloor"])
+         {
+            AddObject("generalRoom_sideDoor",2965.9,1033.15,1,1,0); //add the new side door
+            AddObject("IceFloorEntry",3020,1033.15,1.7238771306,0.529846366,90);
+            AddObject("collRect",2970,835,0.339996337890625,4,0); //split the backing wall for the entrance
+            AddObject("collRect",2970,1170,0.339996337890625,10.88079833984375*0.35,0);
+         }
+         else //otherwise use the blocking tool
+         {
+            AddObject("collRect",2970,835,0.339996337890625,10.88079833984375,0);
+            AddObject("collRect",2526,838.1,0.190032958984375,10.977783203125,0);
+            AddObject("generalRoom_velvetRope",2514,823.5,1,1,0);
+            AddObject("generalRoom_velvetRope",2516,994.5,1,1,0);
+            AddObject("generalRoom_velvetRope",2516,1167.5,1,1,0);
+            AddObject("generalRoom_vipSign",2437.5,800,1,1,0); //was 821, moved back a bit
+            AddObject("collRect",2445,870,0.44000244140625,0.279998779296875,0);
+         }
+         
       }
    }
 }

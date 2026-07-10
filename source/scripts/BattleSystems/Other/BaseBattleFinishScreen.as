@@ -120,6 +120,17 @@ package BattleSystems.Other
          this.AddItemToQueue(1,this.FadeOutMusic);
          this.m_currentSpotInQueue = 0;
          this.RunQueuedMoves();
+         if (Singleton.dynamicData.m_isMod["nuzlocke"]){
+            var _loc2_:int = 0;
+            while(_loc2_ < 5){
+               var ownedMinion:OwnedMinion = Singleton.dynamicData.GetOwnedMinionAt(_loc2_);
+               if (ownedMinion != null && ownedMinion.m_currHealth < 1){
+                  var minionPosition:int = Singleton.dynamicData.GetMinionPosition(ownedMinion);
+                  Singleton.dynamicData.SetMinionTo(minionPosition, null);
+               }
+               _loc2_++;
+            }
+         }
       }
       
       protected function AddItemToQueue(param1:Number, param2:Function = null, param3:OwnedMinion = null, param4:int = -99, param5:Function = null) : void

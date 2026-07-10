@@ -23,10 +23,10 @@ package Minions.MinionMove
       
       private const m_armorModRate:Number = 0.66;
       
-      public function AllBaseMovesContainer()
+      public function AllBaseMovesContainer(param1:int) //param1 is the total number of moves, param2 is the mod configuration
       {
          super();
-         this.m_allMoves = new Vector.<BaseMinionMove>(MinionMoveID.NUM_OF_MOVES);
+         this.m_allMoves = new Vector.<BaseMinionMove>(param1); //default number of vanilla NUM_OF_MOVES. I can use concat to get extras at the end, so I don't need to param
          this.CreateFireMoves();
          this.CreateElectricMoves();
          this.CreateNormalMoves();
@@ -41,9 +41,202 @@ package Minions.MinionMove
          this.CreateFlyingMoves();
          this.CreateHolyMoves();
          this.CreateRobotMoves();
-         this.CreateTitanMoves();
+         this.CreateTitanMoves(); //modded moves are called from StaticData instead (due to possible modded type requirement.)
       }
-      
+     
+
+      public function CreateThawMoves(TypeID:int,MoveClassDict:Object,MoveDict:Object) : void //group function to make all Thaw moves, parameter being the number assigned to Thaw type
+      {
+         //Type to use is "TypeID", dictionary of modded Move Classes is "MoveClassDict", and "MoveDict" is every single modded move
+         // usage: MoveClassDict[MoveCodename] -> int
+         //        MoveDict[MoveCodename + "_t" + level] -> int
+         var _loc1_:BaseMinionMove = null;
+         var _loc2_:Array = null;
+         var _loc3_:Array = null;
+         var _loc4_:Array = null;
+         var _loc5_:Array = null;
+         var _loc6_:Array = null;
+
+         _loc2_ = new Array(5,8,10,20,35); //energy
+         _loc3_ = new Array(10,10,20,20,40); //damage
+         _loc4_ = new Array(30,45,45,60,60); //additional random damage
+         _loc5_ = new Array(1,1,1,2,2); //exhaustion
+         _loc6_ = new Array(0,2,2,4,4); //cooldown
+         _loc1_ = this.CreateMove("Ancient Strike",_loc2_[0],MoveClassDict["iStrike"],MoveDict["iStrike_t1"],"moveIcon_iStrike",TypeID,MinionVisualMoveID.VM_volley); //uses other MoveID, perfectly fine :D
+         _loc1_.m_hitsRandomTargets = true;
+         _loc1_.m_enemiesItHits = 1
+         _loc1_.m_damage = _loc3_[0];
+         _loc1_.m_additionalRandomDamage = _loc4_[0];
+         _loc1_.m_exhaustTime = _loc5_[0];
+         _loc1_.m_moveCoolDownTime = _loc6_[0];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[1]);
+         _loc1_.m_enemiesItHits = 2
+         _loc1_.m_damage = _loc3_[1];
+         _loc1_.m_additionalRandomDamage = _loc4_[1];
+         _loc1_.m_exhaustTime = _loc5_[1];
+         _loc1_.m_moveCoolDownTime = _loc6_[1];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[2]);
+         _loc1_.m_damage = _loc3_[2];
+         _loc1_.m_additionalRandomDamage = _loc4_[2];
+         _loc1_.m_exhaustTime = _loc5_[2];
+         _loc1_.m_moveCoolDownTime = _loc6_[2];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[3]);
+         _loc1_.m_enemiesItHits = 3
+         _loc1_.m_damage = _loc3_[3];
+         _loc1_.m_additionalRandomDamage = _loc4_[3];
+         _loc1_.m_exhaustTime = _loc5_[3];
+         _loc1_.m_moveCoolDownTime = _loc6_[3];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[4],"Ice Age");
+         _loc1_.m_damage = _loc3_[4];
+         _loc1_.m_additionalRandomDamage = _loc4_[4];
+         _loc1_.m_exhaustTime = _loc5_[4];
+         _loc1_.m_moveCoolDownTime = _loc6_[4];
+
+         _loc2_ = new Array(3,5,10,18,25);
+         _loc3_ = new Array(25,25,30,50,65); //damage
+         _loc4_ = new Array(0,15,30,45,70); //additional random damage
+         _loc5_ = new Array(0,-1,-1,-1,-2); //self speed debuff
+         _loc6_ = new Array(0,0,15,20,30); //recoil
+         _loc1_ = this.CreateMove("Arctic Horn",_loc2_[0],MoveClassDict["iHorn"],MoveDict["iHorn_t1"],"moveIcon_iHorn",TypeID,MinionVisualMoveID.VISUALS_SameAsClass);
+         _loc1_.m_doesDeBuffSelf = true;
+         _loc1_.m_damage = _loc3_[0];
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[0];
+         _loc1_.AddStatToDeBuff(StatType.STAT_SPEED);
+         _loc1_.m_selfDamage = _loc6_[0];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[1]);
+         _loc1_.m_damage = _loc3_[1];
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[1];
+         _loc1_.m_selfDamage = _loc6_[1];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[2]);
+         _loc1_.m_damage = _loc3_[2];
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[2];
+         _loc1_.m_selfDamage = _loc6_[2];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[3]);
+         _loc1_.m_damage = _loc3_[3];
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[3];
+         _loc1_.m_selfDamage = _loc6_[3];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[4],"Arctic Impale");
+         _loc1_.m_damage = _loc3_[4];
+         _loc1_.m_additionalRandomDamage = _loc4_[4];
+         _loc1_.m_moveCoolDownTime = 1;
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[4];
+         _loc1_.m_selfDamage = _loc6_[4];
+
+         _loc2_ = new Array(5,10,20,30,40);
+         _loc3_ = new Array(1,5,10,20,35);  //damage
+         _loc4_ = new Array(4,20,40,50,65); //additional random damage
+         _loc5_ = new Array(0,-1,-1,-1,-2); //self speed debuff
+         _loc6_ = new Array(1,5,10,15,20); //recoil
+         _loc1_ = this.CreateMove("Microwave",_loc2_[0],MoveClassDict["iMicro"],MoveDict["iMicro_t1"],"moveIcon_iMicro",TypeID,MinionVisualMoveID.VISUALS_SameAsClass);
+         _loc1_.m_isThereABufferBetweenVisualMovesOnMultipleEnemies = false;
+         _loc1_.m_hitsRandomTargets = true;
+         _loc1_.m_enemiesItHits = 2
+         _loc1_.m_damage = _loc3_[0];
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[0];
+         _loc1_.m_additionalRandomDamage = _loc4_[0];
+         _loc1_.m_selfDamage = _loc6_[0];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[1]);
+         _loc1_.m_damage = _loc3_[1];
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[1];
+         _loc1_.m_additionalRandomDamage = _loc4_[1];
+         _loc1_.m_selfDamage = _loc6_[1];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[2]);
+         _loc1_.m_damage = _loc3_[2];
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[2];
+         _loc1_.m_enemiesItHits = 3
+         _loc1_.m_additionalRandomDamage = _loc4_[2];
+         _loc1_.m_selfDamage = _loc6_[2];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[3]);
+         _loc1_.m_damage = _loc3_[3];
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[3];
+         _loc1_.m_enemiesItHits = 4
+         _loc1_.m_additionalRandomDamage = _loc4_[3];
+         _loc1_.m_selfDamage = _loc6_[3];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[4],"Macrowave");
+         _loc1_.m_enemiesItHits = 5
+         _loc1_.m_damage = _loc3_[4];
+         _loc1_.m_additionalRandomDamage = _loc4_[4];
+         _loc1_.m_moveCoolDownTime = 3;
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[4];
+         _loc1_.m_selfDamage = _loc6_[4];
+
+
+         _loc2_ = new Array(1,3,8,15,30);
+         _loc3_ = new Array(5,15,30,50,75);  //damage
+         _loc4_ = new Array(1,1,1,2,2); //cooldown
+         _loc5_ = new Array(0,-1,-1,-2,-2); //opponent speed debuff
+         _loc1_ = this.CreateMove("Cold Breath",_loc2_[0],MoveClassDict["iBreath"],MoveDict["iBreath_t1"],"moveIcon_iBreath",TypeID,MinionVisualMoveID.VISUALS_SameAsClass);
+         _loc1_.m_doesDeBuffTargets = true;
+         _loc1_.m_isThereABufferBetweenVisualMovesOnMultipleEnemies = false;
+         _loc1_.m_hitsRandomTargets = true;
+         _loc1_.m_enemiesItHits = 1
+         _loc1_.m_damage = _loc3_[0];
+         _loc1_.m_moveCoolDownTime = _loc4_[0];
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[0];
+         _loc1_.AddStatToDeBuff(StatType.STAT_ATTACK);
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[1]);
+         _loc1_.m_damage = _loc3_[1];
+         _loc1_.m_moveCoolDownTime = _loc4_[1];
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[1];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[2]);
+         _loc1_.m_enemiesItHits = 2
+         _loc1_.m_damage = _loc3_[2];
+         _loc1_.m_moveCoolDownTime = _loc4_[2];
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[2];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[3]);
+         _loc1_.m_damage = _loc3_[3];
+         _loc1_.m_moveCoolDownTime = _loc4_[3];
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[3];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[4],"Iced Sigh");
+         _loc1_.m_damage = _loc3_[4];
+         _loc1_.m_moveCoolDownTime = _loc4_[4];
+         _loc1_.m_stagesOfStatTypeToDeBuff = _loc5_[4];
+
+
+         _loc2_ = new Array(9,18,25,30,40);
+         _loc3_ = new Array(1,10,25,30,50);  //damage
+         _loc4_ = new Array(1,1,2,2,3); //cooldown
+         _loc5_ = new Array(34,40,50,60,100); //additional attack
+         _loc1_ = this.CreateMove("Arctic Fist",_loc2_[0],MoveClassDict["iFist"],MoveDict["iFist_t1"],"moveIcon_iFist",TypeID,MinionVisualMoveID.VISUALS_SameAsClass);
+         _loc1_.m_enemiesItHits = 3
+         _loc1_.m_damage = _loc3_[0];
+         _loc1_.m_moveCoolDownTime = _loc4_[0];
+         _loc1_.m_additionalRandomDamage = _loc5_[0];
+         _loc1_.AddStatToDeBuff(StatType.STAT_ATTACK);
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[1]);
+         _loc1_.m_damage = _loc3_[1];
+         _loc1_.m_moveCoolDownTime = _loc4_[1];
+         _loc1_.m_additionalRandomDamage = _loc5_[1];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[2]);
+         _loc1_.m_damage = _loc3_[2];
+         _loc1_.m_moveCoolDownTime = _loc4_[2];
+         _loc1_.m_additionalRandomDamage = _loc5_[2];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[3]);
+         _loc1_.m_damage = _loc3_[3];
+         _loc1_.m_moveCoolDownTime = _loc4_[3];
+         _loc1_.m_additionalRandomDamage = _loc5_[3];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[4],"Polar");
+         _loc1_.m_damage = _loc3_[4];
+         _loc1_.m_moveCoolDownTime = _loc4_[4];
+         _loc1_.m_additionalRandomDamage = _loc5_[4];
+
+         _loc2_ = new Array(8,15,30,40,55);
+         _loc3_ = new Array(10,25,45,50,79);  //enemy armor
+         _loc1_ = this.CreateMove("Melt",_loc2_[0],MoveClassDict["iMelt"],MoveDict["iMelt_t1"],"moveIcon_iMelt",TypeID,MinionVisualMoveID.VISUALS_SameAsClass);
+         _loc1_.m_enemiesItHits = 1
+         _loc1_.m_armor = _loc3_[0];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[1]);
+         _loc1_.m_damage = _loc3_[1];         
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[2]);
+         _loc1_.m_damage = _loc3_[2];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[3]);
+         _loc1_.m_damage = _loc3_[3];
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[4],"Defrost");
+         _loc1_.m_damage = _loc3_[4];
+         
+
+      }
+
       private function CreateFireMoves() : void
       {
          var _loc1_:BaseMinionMove = null;
@@ -592,7 +785,7 @@ package Minions.MinionMove
          _loc1_.m_chanceToDeBuff = 80;
          _loc1_.m_stagesOfStatTypeToDeBuff = -1;
          _loc1_.m_doesHitEachEnemy = false;
-         _loc1_ = this.old_EarthCM(4,"Tetectonic Shift",45,55,125,0,3,5);
+         _loc1_ = this.old_EarthCM(4,"Tectonic Shift",45,55,125,0,3,5); //spelling mistake xD
          _loc1_.m_doesDeBuffTargets = true;
          _loc1_.AddStatToDeBuff(StatType.STAT_SPEED);
          _loc1_.m_chanceToDeBuff = 85;
@@ -1506,7 +1699,7 @@ package Minions.MinionMove
          _loc1_.m_DOTDamage = 25;
          _loc1_ = this.CopyMove(_loc1_,_loc2_[3]);
          _loc1_.m_DOTDamage = 30;
-         _loc1_ = this.CopyMove(_loc1_,_loc2_[4],"Arkam Asylum");
+         _loc1_ = this.CopyMove(_loc1_,_loc2_[4],"Arkham Asylum"); //another misspell lol
          _loc1_.m_damage = 20;
          _loc1_.m_DOTDamage = 50;
       }

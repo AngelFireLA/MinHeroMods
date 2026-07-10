@@ -13,8 +13,10 @@ package SharedObjects.BaseInterfacePieces
       private var m_onToggleCall:Function;
       
       private var _isToggleOn:Boolean;
+
+      public var UID:String;
       
-      public function ToggleButton(param1:Function, param2:String, param3:String, param4:String = "", param5:String = "")
+      public function ToggleButton(param1:Function, param2:String, param3:String, param4:String = "", param5:String = "", param6:String="") //added param6 as unqiue identifier for toggle
       {
          super();
          this.m_onToggleCall = param1;
@@ -23,6 +25,7 @@ package SharedObjects.BaseInterfacePieces
          this.m_offButton = new TCButton(this.ToggleTheButton,param3,param5);
          addChild(this.m_offButton);
          this.m_isToggleOn = false;
+         this.UID = param6; //unique identifier for toggle
       }
       
       public function Update() : void
@@ -33,7 +36,14 @@ package SharedObjects.BaseInterfacePieces
       private function ToggleTheButton(param1:MouseEvent) : void
       {
          this.m_isToggleOn = !this._isToggleOn;
-         this.m_onToggleCall.call();
+         if(this.UID != "") //if we do have a unique ID, call with argument
+         {
+            this.m_onToggleCall.call(null, this.UID);
+         }
+         else //otherwise, as normal
+         {
+            this.m_onToggleCall.call();
+         }
       }
       
       public function set m_isToggleOn(param1:Boolean) : void

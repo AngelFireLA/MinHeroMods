@@ -79,6 +79,8 @@ package MainMenu
       public var m_saveSlots:Vector.<FileSelectIcon>;
       
       public var m_charCreationPopup:CharCreationPopup;
+
+      public var m_modMenu:ModMenu;
       
       public var m_muteMusicButton:ToggleButton;
       
@@ -93,7 +95,7 @@ package MainMenu
       public var m_textSet4:Vector.<TextField>;
       
       public var m_skipIntroButton:TCButton;
-      
+
       public function MainMenuScreen()
       {
          super();
@@ -321,9 +323,17 @@ package MainMenu
          }
          this.m_charCreationPopup = new CharCreationPopup();
          this.m_charCreationPopup.LoadSprites();
-         this.m_charCreationPopup.x = 108;
+         this.m_charCreationPopup.x = -5; //changed to -5 from 108
          this.m_charCreationPopup.y = 139;
          addChild(this.m_charCreationPopup);
+         //INSERTING CUSTOM MOD CONFIG MENU
+         this.m_modMenu = new ModMenu(); //new there's a funky script for it
+         this.m_modMenu.LoadSprites();
+         this.m_modMenu.x = 478;
+         this.m_modMenu.y = 144;
+         addChild(this.m_modMenu);
+         //END
+
          this.m_creditsScreen = new CreditsScreen();
          this.m_creditsScreen.LoadSprites();
          addChild(this.m_creditsScreen);
@@ -364,6 +374,7 @@ package MainMenu
          super.StartActivate();
          Singleton.dynamicData.LoadInitialData();
          this.m_charCreationPopup.visible = false;
+         this.m_modMenu.visible = false;
          this.m_blackOverlayForButtons.x = 0;
          this.m_blackOverlayForButtons.y = 194;
          this.m_playButton.x = 263;
@@ -408,21 +419,25 @@ package MainMenu
          this.m_sponsorTwitter.x = 639;
          this.m_sponsorTwitter.y = 473;
          this.m_sponsorTwitter.alpha = 0;
+         trace("Bringing in state");
          this.m_currState = MainMenuStates.MAIN_MENU_BRINGING_IN;
          Singleton.utility.m_soundController.ChangeMusicTrack(BackgroundMusicTracks.MUSIC_TITLE);
          Singleton.utility.m_soundController.FadeCurrentMusic(1,3);
+         trace("Final stuff");
       }
       
       override public function FinishActivate() : void
       {
          super.FinishActivate();
          this.TurnOffAllTheAlphasBeforeAnimation();
+         trace("Bringing in start animation");
          this.StartBringInAnimation_Part1();
       }
       
       override public function DeActivate() : void
       {
          super.DeActivate();
+         trace("Deactivating...")
          removeChild(this.m_sponsorTwitter);
          this.m_sponsorTwitter.unloadAndStop();
          removeChild(this.m_sponsorFacebook);
@@ -450,13 +465,13 @@ package MainMenu
          }
       }
       
-      private function StartBringInAnimation_Part1() : void
+      private function StartBringInAnimation_Part1() : void //the camrea panning down
       {
          var _loc1_:TimelineLite = new TimelineLite();
          _loc1_.append(new TweenLite(this.m_fullBlackOverlay,0.5,{"onComplete":this.StartTheBackgroundMovement}));
          _loc1_.append(new TweenLite(this.m_fullBlackOverlay,1.5,{"alpha":0}));
          _loc1_ = new TimelineLite();
-         _loc1_.append(new TweenLite(this,1.9,{"onComplete":this.StartBringInAnimation_Part2}));
+         _loc1_.append(new TweenLite(this,1.9,{"onComplete":this.StartBringInAnimation_Part2})); //start the second part, the loading of the assets
       }
       
       private function StartTheBackgroundMovement() : void
@@ -464,7 +479,7 @@ package MainMenu
          this.m_currState = MainMenuStates.MAIN_MENU_ANIMATING;
       }
       
-      private function StartBringInAnimation_Part2() : void
+      private function StartBringInAnimation_Part2() : void //Loads in all of the MainMenuScreen
       {
          this.m_titleIcon.alpha = 0;
          this.m_titleIcon.y -= 50;
@@ -518,7 +533,7 @@ package MainMenu
          _loc3_.append(new TweenLite(this.m_hostGamesButton,0.8,{"alpha":1}));
          _loc3_ = new TimelineLite();
          _loc3_.append(new TweenLite(this.m_tcGamesButton,2.7,{}));
-         _loc3_.append(new TweenLite(this.m_tcGamesButton,0.8,{
+         _loc3_.append(new TweenLite(this.m_tcGamesButton,0.8,{  
             "alpha":1,
             "onComplete":this.FinishBringInAnimation
          }));
@@ -535,11 +550,11 @@ package MainMenu
          this.m_currState = MainMenuStates.MAIN_MENU_TITLE_SCREEN;
       }
       
-      private function SkipButtonPressed(param1:MouseEvent) : void
+      private function SkipButtonPressed(param1:MouseEvent) : void  //tutorial creation beyond skip. Seems to funky up stuff
       {
-         TweenLite.killTweensOf(this);
-         Singleton.dynamicData.LoadData(Singleton.dynamicData.m_saveSlot);
-         this.AddInitialMinions();
+         TweenLite.killTweensOf(this); 
+         Singleton.dynamicData.LoadData(Singleton.dynamicData.m_saveSlot,true); //load data
+         this.AddInitialMinions(); //initial minions
          Singleton.utility.m_screenControllers.SetSceneTo(GameState.TOP_DOWN_SCREEN,true,0.5);
          Singleton.utility.m_soundController.FadeCurrentMusic(0.1,0.8);
       }
@@ -549,7 +564,7 @@ package MainMenu
          TweenLite.to(this.m_skipIntroButton,0.5,{"alpha":1});
       }
       
-      private function PlayButtonPressed(param1:MouseEvent) : void
+      private function PlayButtonPressed(param1:MouseEvent) : void //loads the save slots
       {
          TweenLite.to(this.m_playButton,0.7,{
             "y":"-90",
@@ -649,7 +664,7 @@ package MainMenu
          _loc2_.append(new TweenLite(param1,0.1,{"x":"-1"}));
       }
       
-      public function StartTheEnterGameForTheFirstTimeAnimaiton() : void
+      public function StartTheEnterGameForTheFirstTimeAnimaiton() : void //anination when starting the game for the first time
       {
          var _loc3_:TimelineLite = null;
          Singleton.utility.m_stage.addEventListener(MouseEvent.CLICK,this.CheckToActivateSkipButton);
@@ -662,8 +677,9 @@ package MainMenu
          TweenLite.to(this.m_fullBlackOverlay,0.5,{"alpha":0});
          TweenLite.to(this.m_blackOverlayForButtons,0.5,{"alpha":0});
          TweenLite.to(this.m_charCreationPopup,0.5,{"alpha":0});
+         TweenLite.to(this.m_modMenu,0.5,{"alpha":0});
          TweenLite.to(this.m_titleIcon,0.5,{"alpha":0});
-         this.m_charCreationPopup.ExitOut();
+         this.m_charCreationPopup.ExitOut(); //not needed for ModMenu
          this.m_doorOuterGlow_mask.visible = true;
          this.m_doorOuterGlow.visible = true;
          _loc3_ = new TimelineLite();
@@ -766,8 +782,8 @@ package MainMenu
             "onCompleteParams":[this.m_textSet4]
          }));
          _loc3_.append(new TweenLite(this,10.05,{
-            "onComplete":Singleton.dynamicData.LoadData,
-            "onCompleteParams":[Singleton.dynamicData.m_saveSlot]
+            "onComplete":Singleton.dynamicData.LoadData, //text fade leads to loading data
+            "onCompleteParams":[Singleton.dynamicData.m_saveSlot,true]
          }));
          _loc3_.append(new TweenLite(this,0.05,{"onComplete":this.AddInitialMinions}));
          _loc3_.append(new TweenLite(this,0.8,{
@@ -831,20 +847,20 @@ package MainMenu
          }));
       }
       
-      private function AddInitialMinions() : void
+      private function AddInitialMinions() : void //adding the starter minions. 
       {
          Singleton.utility.m_stage.removeEventListener(MouseEvent.CLICK,this.CheckToActivateSkipButton);
          this.m_skipIntroButton.alpha = 0;
-         var _loc1_:OwnedMinion = new OwnedMinion(MinionDexID.DEX_ID_Tiger_1);
-         Singleton.dynamicData.AddToOwnedMinions(_loc1_);
-         _loc1_.SetLevel(5);
-         _loc1_.m_currentExp += 300;
-         _loc1_.CalculateCurrStats();
-         _loc1_.ReFillHealthAndEnergy();
          _loc1_ = new OwnedMinion(MinionDexID.DEX_ID_fire_pig_1);
          Singleton.dynamicData.AddToOwnedMinions(_loc1_);
          _loc1_.SetLevel(4);
          _loc1_.m_currentExp += 350;
+         _loc1_.CalculateCurrStats();
+         _loc1_.ReFillHealthAndEnergy();
+         _loc1_ = new OwnedMinion(MinionDexID.DEX_ID_Tiger_1); //change to DexID of any adding test minion
+         Singleton.dynamicData.AddToOwnedMinions(_loc1_);
+         _loc1_.SetLevel(5);
+         _loc1_.m_currentExp += 300;
          _loc1_.CalculateCurrStats();
          _loc1_.ReFillHealthAndEnergy();
          Singleton.dynamicData.SetHasUnlockedFloor(0,true);
@@ -938,8 +954,15 @@ package MainMenu
             "delay":0.5,
             "alpha":1
          });
+         this.m_modMenu.visible = true; //adding mod menu stuff in tandem with charCreationPopup
+         this.m_modMenu.alpha = 0;
+         TweenLite.to(this.m_modMenu,0.9,{
+            "delay":0.5,
+            "alpha":1
+         });
          this.m_currState = MainMenuStates.MAIN_MENU_CHAR_CREATION;
          this.m_charCreationPopup.BringIn();
+         this.m_modMenu.BringIn(); //bring in mods too
       }
       
       public function AnimateOutTheCharSelectionScreen() : void
@@ -972,8 +995,9 @@ package MainMenu
             "alpha":0,
             "onComplete":this.FinishAnimateOutTheCharSelectionScreen
          });
+         TweenLite.to(this.m_modMenu,0.5,{"alpha":0}); //no onComplete needed as that just changes the state
          this.m_currState = MainMenuStates.MAIN_MENU_ANIMATING;
-         this.m_charCreationPopup.ExitOut();
+         this.m_charCreationPopup.ExitOut(); //don't need an exitOut for mods, focus is only for the char creation popup
       }
       
       private function FinishAnimateOutTheCharSelectionScreen() : void
@@ -1036,6 +1060,7 @@ package MainMenu
          else if(this.m_currState == MainMenuStates.MAIN_MENU_CHAR_CREATION)
          {
             this.m_charCreationPopup.Update();
+            this.m_modMenu.Update();
          }
          if(this.m_skipIntroButton.alpha == 1)
          {

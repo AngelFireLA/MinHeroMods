@@ -26,6 +26,233 @@ package TopDown.Trainers
          this.m_extraHardModeModifier = Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER;
       }
       
+      /** UNCOMMENT WHEN NEEDED
+
+      //inserting Ice Floor stuff here:
+      public function CreateIceFloor(): void
+      {
+         this.CreateIceFloor1();
+         this.CreateIceFloor2();
+         this.CreateIceFloor3();
+         this.CreateIceFloor4();
+         this.CreateIceFloor_Boss1();
+      }
+   
+      //Use strength from Floor 17-20 + Boss5 when getting strength values. This will unlock as a separate region once Floor 5 is unlocked.
+      private function CreateIceFloor1() : void
+      {
+         var _loc2_:TrainerDataObject = null;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.NORMAL_TRAINER,0,1);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "My teacher has taught me well.\nMy Narthawl will show you just that.";
+         _loc2_.m_whatTrainerSaysAtLose = "You knew thaw types are weak to electric and earth moves didn't you!";
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterSeal_2,[75,595,582,244,369,491,225,211]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterSeal_2,[75,489,493,227,582,242]);
+         _loc2_.AddMinion(Singleton.staticData.ModToDexID["iSeal3"],[]);
+         _loc2_.AddMinion(Singleton.staticData.ModToDexID["iUnicorn3"],[]);
+         _loc2_.AddMinion(Singleton.staticData.ModToDexID["iUnicorn2"],[]);
+         _loc2_.m_extraMinionLevels = -2;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.NORMAL_TRAINER,0,2);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "I won\'t give up my key easily!";
+         _loc2_.m_whatTrainerSaysAtLose = "You might be good enough to beat my teacher!";
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassGorilla_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassGorilla_1,[]);
+         _loc2_.m_extraMinionLevels = -2;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.NORMAL_TRAINER,0,3);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = " Let\'s see if we can learn from one another.";
+         _loc2_.m_whatTrainerSaysAtLose = "That was great!  Here is a key to my teachers door.";
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterBird_1,[626,584,599,249,292]);
+         _loc2_.m_extraMinionLevels = -1;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.HARD_TRAINER,0,4);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassGorilla_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterBird_1,[]);
+         _loc2_.m_extraMinionLevels = -1;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.EXPERT_TRAINER,0,5);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterBird_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterBird_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassGorilla_1,[]);
+         _loc2_.m_extraMinionLevels = 1;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.BOSS_TRAINER,0,6);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "I am a Sage of Courage.  To be a Grand Sage you must demonstrate the ability to be courageous.";
+         _loc2_.m_whatTrainerSaysAtLose = "You have demonstrated much courage in that battle, but there is still more to learn.  Here is the first piece of the Courage Sage Seal.  Also, here is a key to the hatchery.";
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterBird_1,[626,584,599,249,292]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_groundAttacker_1,[75,155,89,119,289,165,273]);
+         _loc2_.m_extraMinionLevels = 0;
+      }
+      
+      private function CreateIceFloor2() : void
+      {
+         var _loc2_:TrainerDataObject = null;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.NORMAL_TRAINER,1,1);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "Each floor has students that are stronger than the previous floors.";
+         _loc2_.m_whatTrainerSaysAtLose = "You are quite strong, my friend!";
+         _loc2_.AddMod_Shield(1,1);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_iceBird_1,[80,625,490,486,480,500,241]);
+         _loc2_.m_extraMinionLevels = -2;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.NORMAL_TRAINER,1,2);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "There wasn\'t much to do after we destroyed the ring...";
+         _loc2_.m_whatTrainerSaysAtLose = "You would do well in the fellowship.";
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassGorilla_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassGorilla_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_groundMole_1,[81,155,131,101,216,225,289,89,165,176]);
+         _loc2_.m_extraMinionLevels = -2;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.NORMAL_TRAINER,1,3);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "My teacher has taught me well.  I will show you the strength of my birds!";
+         _loc2_.m_whatTrainerSaysAtLose = "I admit they are weak to electric and ground moves.";
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterBird_1,[626,584,599,249,292]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_iceBird_1,[80,625,490,486,480,500,241]);
+         _loc2_.m_extraMinionLevels = -1;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.HARD_TRAINER,1,4);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterBird_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterBird_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_1,[]);
+         _loc2_.m_extraMinionLevels = -1;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.EXPERT_TRAINER,1,5);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_groundMole_1,[80,155,211,175]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_groundMole_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_tRex_1,[]);
+         _loc2_.m_extraMinionLevels = 0;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.BOSS_TRAINER,1,6);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "Courage is the ability to do a difficult thing.  I will test your courage now.";
+         _loc2_.m_whatTrainerSaysAtLose = "You have shown me you understand courage, here is the second piece to the Sage Seal of Courage.";
+         _loc2_.AddMod_Shield(1,1);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_groundAttacker_1,[75,155,89,119,289,165,273]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_groundMole_1,[81,155,131,101,216,225,289,89,165,176]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_1,[]);
+         _loc2_.m_extraMinionLevels = 0;
+      }
+      
+      private function CreateIceFloor3() : void
+      {
+         var _loc2_:TrainerDataObject = null;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.NORMAL_TRAINER,2,1);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "My Tatails are so cute...I mean cool!!";
+         _loc2_.m_whatTrainerSaysAtLose = "How dare you do that to them!!";
+         _loc2_.AddMod_Shield(1,1);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_1,[90,450,429,242,422,297,272,286]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_racoon_1,[80,584,297,487,225,287,241,270]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_racoon_1,[80,4,243,58,25,271,41]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_racoon_1,[80,344,273,335,831,276,242,55]);
+         _loc2_.m_extraMinionLevels = -2;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.NORMAL_TRAINER,2,2);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "Har Har, let\'s see what you\'re made of my lad.";
+         _loc2_.m_whatTrainerSaysAtLose = "Lad, you put the hurting on me. Well done!";
+         _loc2_.AddMod_Shield(1,1);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterSeal_1,[75,329,302,287,509,141]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_1,[90,450,429,242,422,297,272,286]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_1,[90,450,129,219,100,650,141,272,421]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_1,[91,450,89,272,288,297,242]);
+         _loc2_.m_extraMinionLevels = -2;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.NORMAL_TRAINER,2,3);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "Electricity is the life of machinery, can you stand up to it?";
+         _loc2_.m_whatTrainerSaysAtLose = "That was a shockingly good battle!";
+         _loc2_.AddMinion(MinionDexID.DEX_ID_cheetah_1,[80,343,334,249,297,276]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_Goo_1,[85,94,122,248,345,342,356]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_Goo_1,[85,94,122,248,345,342,356]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_Goo_1,[85,94,122,248,345,342,356]);
+         _loc2_.m_extraMinionLevels = -1;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.HARD_TRAINER,2,4);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_demonic_cat_1,[80,539,142,558,847,278]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_demonic_cat_1,[80,564,576,249,572,292]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterBird_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterBird_1,[]);
+         _loc2_.m_extraMinionLevels = -1;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.EXPERT_TRAINER,2,5);
+         _loc2_.AddMinion(59,[80,342,330]);
+         _loc2_.AddMinion(57,[110,176,155,305]);
+         _loc2_.AddMinion(57,[110,176,155,305]);
+         _loc2_.AddMinion(65,[85,880,545,355]);
+         _loc2_.m_extraMinionLevels = 0;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.BOSS_TRAINER,2,6);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "You\'re shaping into quite the trainer.";
+         _loc2_.m_whatTrainerSaysAtLose = "Here is the final piece to the Sage Seal of Courage, you must fight the Grass Sage to have it fused together.";
+         _loc2_.AddMod_Shield(2,2);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterSeal_1,[75,595,582,244,369,491,225,211]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_1,[91,450,89,272,288,297,242]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_groundMole_1,[80,155,154,147,270,249,26,243,11]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterBird_1,[626,584,599,249,292]);
+         _loc2_.m_extraMinionLevels = 0;
+      }
+      
+      private function CreateIceFloor4() : void
+      {
+         var _loc2_:TrainerDataObject = null;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.NORMAL_TRAINER,3,1);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "It\'s a great day for a hike!";
+         _loc2_.m_whatTrainerSaysAtLose = "It\'s always a great day for a hike!";
+         _loc2_.AddMod_Shield(1,1);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_iceTree_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_iceTree_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_tRex_1,[]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_groundAttacker_1,[]);
+         _loc2_.m_extraMinionLevels = -2;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.NORMAL_TRAINER,3,2);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "The flowers bloom just as my beauty blooms.";
+         _loc2_.m_whatTrainerSaysAtLose = "It appears your skill blooms as the flowers do.";
+         _loc2_.AddMinion(MinionDexID.DEX_ID_healingHorse_1,[75,619,263,517,614,258]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterSeal_1,[75,595,582,244,369,491,225,211]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterSeal_1,[75,489,493,227,582,242]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_groundMole_1,[80,155,214,179,304,101,296,216]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_iceBird_1,[80,625,494,487,499,244,631]);
+         _loc2_.m_extraMinionLevels = -1;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.NORMAL_TRAINER,3,3);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "One does not simply win a battle.";
+         _loc2_.m_whatTrainerSaysAtLose = "We\'ll I guess one does...";
+         _loc2_.AddMod_Shield(2,2);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassGorilla_2,[75,105,459,421,462,244,156,395]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_iceTree_2,[75,499,509,485,520,279]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_holyMantris_1,[80,435,679,264,671,259,440]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_racoon_2,[80,4,243,58,25,271,41]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_racoon_2,[80,344,273,335,831,276,242,55]);
+         _loc2_.m_extraMinionLevels = -1;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.HARD_TRAINER,3,4);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_groundMole_1,[80,155,214,179,304,101,296,216]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_iceBird_1,[80,625,639,632,279,487,241]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_demonic_cat_1,[80,539,142,558,847,278]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_demonic_cat_1,[80,564,576,249,572,292]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_healingHorse_1,[75,619,263,517,614,258]);
+         _loc2_.m_extraMinionLevels = -1;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.EXPERT_TRAINER,3,5);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_groundAttacker_1,[75,155,154,149,167,249,26]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_groundMole_1,[80,155,214,179,304,101,296,216]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_demonic_cat_1,[80,564,576,249,572,292]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_tRex_1,[410,370,385,249,394,34,574,97]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_holyMantris_1,[80,435,679,264,671,259,440]);
+         _loc2_.m_extraMinionLevels = 0;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.BOSS_TRAINER,3,6);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "I will show you the true strength of the minions you are about to get.";
+         _loc2_.m_whatTrainerSaysAtLose = "Go claim your prize, here is a key to the hatchery.";
+         _loc2_.AddMod_Shield(1,1);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_healingHorse_1,[75,434,582,249,599,457]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_tRex_2,[410,370,385,249,394,34,574,97]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_holyMantris_1,[80,436,479,259,470,264,670]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_2,[90,450,429,242,422,297,272,286]);
+         _loc2_.m_extraMinionLevels = 0;
+      }
+      
+      private function CreateIceFloor_Boss1() : void
+      {
+         var _loc2_:TrainerDataObject = null;
+         _loc2_ = this.AddTrainerToFloor(TrainerType.TRAINER_GYM_1,4,0);
+         _loc2_.m_whatTrainerSaysAtStart_notBeaten = "You have done very well so far, but I will push you to your limits.  For I am Tafel the Grass Sage.";
+         _loc2_.m_whatTrainerSaysAtLose = "That was fantastic!!  I award you the Sage Seal of Courage.\n...\nYou can now find random money chests in the Tower.";
+         _loc2_.AddMod_Shield(2,2);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_tRex_1,[410,370,385,249,394,34,574,97]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_groundMole_1,[80,155,154,147,270,249,26,243,11]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_grassSnake_2,[90,450,429,242,422,297,272,286]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_iceTree_1,[75,439,472,259,475,518,275]);
+         _loc2_.AddMinion(MinionDexID.DEX_ID_waterBird_1,[626,584,599,249,292]);
+         _loc2_.m_extraMinionLevels = 0;
+      }
+      //END OF
+       */
+
       public function CreateFloors() : void
       {
          this.CreateFloor1();

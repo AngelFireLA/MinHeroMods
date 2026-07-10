@@ -363,9 +363,7 @@ package States
       
       public static const purge:int = 179;
       
-      public static const desperation:int = 180;
-      
-      public static const NUM_OF_MOVE_CLASSES:int = 181;
+      public static const desperation:int = 180; //total has no need to exist
       
       public function MinionMoveClasses()
       {

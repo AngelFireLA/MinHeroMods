@@ -193,12 +193,24 @@ package LevelSelect
          return _loc1_;
       }
       
-      override public function StartActivate() : void
+      override public function StartActivate() : void //entry point for modifications
       {
          var _loc2_:int = 0;
          super.StartActivate();
          Singleton.dynamicData.HealAllOfAPlayersInPartyMinions();
          this.m_isAnimating = false;
+
+         //Tower-specific changes
+         if(Singleton.dynamicData.m_FloorType == "icefloor") //if the generating ElevatorEntrance is for the Ice Floor
+         {
+            Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER = 5; //hopefully this works
+         }
+         else //otherwise, assume vanilla
+         {
+            Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER = 31;
+         }
+         trace("Number of floors in the standard tower is: " + Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER);
+         
          if(Singleton.dynamicData.GetHasUnlockedFloor(Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER))
          {
             if(Singleton.dynamicData.m_currFloorOfTower < Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER)

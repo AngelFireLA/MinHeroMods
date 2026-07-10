@@ -8,6 +8,8 @@ package Minions
    import States.StatType;
    import States.TrainerType;
    import Utilities.Singleton;
+   import Utilities.DataEvent;
+   import Utilities.SocketManager;
    import com.greensock.TweenLite;
    
    public class OwnedMinion
@@ -98,8 +100,12 @@ package Minions
       public var m_chargeEnemiesItHits:Vector.<OwnedMinion>;
       
       public var m_currCharge:int;
+
+      public var socketManager:SocketManager;
+
+      public var ModName:String = "Vanilla"; //for identifying if a minion belongs to a mod without reliancy on dexID
       
-      public function OwnedMinion(param1:int, param2:Boolean = true)
+      public function OwnedMinion(param1:int, param2:Boolean = true) //param1 is dexID
       {
          super();
          this.m_minionDexID = param1;
@@ -107,7 +113,11 @@ package Minions
          this.m_currentExp = 1;
          this.m_isExtraBattleModMinion = false;
          this.m_minionName = Singleton.staticData.GetBaseMinion(this.m_minionDexID).m_baseMinionName;
-         this.m_IVs = new Vector.<int>(5);
+         if(param1>101) //if our minion is a mod (due to excessive dexID)
+         {
+            this.ModName = Singleton.staticData.GetBaseMinion(this.m_minionDexID).m_minionBattleSprite; //use the minion battle sprite, duals for codename
+         }
+         this.m_IVs = new Vector.<int>(5); //all initialise to zero, could delete? will do after next mod (if nothing breaks)
          this._minionID = Singleton.dynamicData.GetNextSettingMinionID();
          this._allMoves = new Vector.<int>();
          var _loc3_:int = 0;
@@ -133,8 +143,141 @@ package Minions
          this.m_currExhaust = 0;
          this.m_trainerType = TrainerType.NO_TRAINER;
          this.SetupForCombat();
+         if(SocketManager.isEnabled) //if we are using MultiMode
+         {
+            socketManager = SocketManager.getInstance();
+            socketManager.addEventListener(DataEvent.DATA_RECEIVED,onDataReceived);
+         }
       }
       
+      private function sendData(data:String) : void //don't need to type-check this as it'll never trigger!
+      {
+         socketManager.sendData(data);
+      }
+      
+      private function onDataReceived(event:DataEvent) : void
+      {
+         var data:String = event.data;
+      }
+
+      public function toJSONString() : String //converts the OwnedMinion object to a string
+      {
+         var baseMinion:BaseMinion = this.m_baseMinion;
+         var ownedMinionData:String = "{";
+         ownedMinionData += "\"minionID\": " + this.minionID + ", ";
+         ownedMinionData += "\"minionDexID\": " + this.m_minionDexID + ", ";
+         ownedMinionData += "\"minionName\": \"" + this.m_minionName + "\", ";
+         ownedMinionData += "\"isPlayersMinion\": " + this.m_isPlayersMinion + ", ";
+         ownedMinionData += "\"trainerType\": " + this.m_trainerType + ", ";
+         ownedMinionData += "\"statBonus\": " + this.m_statBonus + ", ";
+         ownedMinionData += "\"currHealthStat\": " + this.currHealthStat + ", ";
+         ownedMinionData += "\"currEnergyStat\": " + this.currEnergyStat + ", ";
+         ownedMinionData += "\"currAttackStat\": " + this.currAttackStat + ", ";
+         ownedMinionData += "\"currHealingStat\": " + this.currHealingStat + ", ";
+         ownedMinionData += "\"currSpeedStat\": " + this.currSpeedStat + ", ";
+         ownedMinionData += "\"currentExp\": " + this.m_currentExp + ", ";
+         ownedMinionData += "\"trainedMove\": " + this.m_trainedMove + ", ";
+         ownedMinionData += "\"IVs\": [" + this.m_IVs.join(", ") + "], ";
+         var gemsData:Array = [];
+         var i:int = 0;
+         while(i < this.m_gems.length)
+         {
+            if(this.m_gems[i] != null)
+            {
+               gemsData.push(this.m_gems[i].toJSONString());
+            }
+            else
+            {
+               gemsData.push("null");
+            }
+            i++;
+         }
+         ownedMinionData += "\"gems\": [" + gemsData.join(", ") + "], ";
+         ownedMinionData += "\"currDOTsAndHOTs\": [" + this.m_currDOTsAndHOTs.join(", ") + "], ";
+         ownedMinionData += "\"turnsDOTsAndHOTsHaveBeenIn\": [" + this.m_turnsDOTsAndHOTsHaveBeenIn.join(", ") + "], ";
+         ownedMinionData += "\"minionForDOTsAndHOTs\": [" + this.vectorToString(this.m_minionForDOTsAndHOTs) + "], ";
+         ownedMinionData += "\"currMovesOnCoolDown\": [" + this.m_currMovesOnCoolDown.join(", ") + "], ";
+         ownedMinionData += "\"turnsMovesOnCoolDownHaveBeenIn\": [" + this.m_turnsMovesOnCoolDownHaveBeenIn.join(", ") + "], ";
+         ownedMinionData += "\"currHealth\": " + this.m_currHealth + ", ";
+         ownedMinionData += "\"currEnergy\": " + this.m_currEnergy + ", ";
+         ownedMinionData += "\"currShield\": " + this.m_currShield + ", ";
+         ownedMinionData += "\"maxShield\": " + this.m_maxShield + ", ";
+         ownedMinionData += "\"isBattleModShieldActive\": " + this.m_isBattleModShieldActive + ", ";
+         ownedMinionData += "\"isExtraBattleModMinion\": " + this.m_isExtraBattleModMinion + ", ";
+         ownedMinionData += "\"currExhaust\": " + this.m_currExhaust + ", ";
+         ownedMinionData += "\"currStatStages\": [" + this.m_currStatStages.join(", ") + "], ";
+         ownedMinionData += "\"moveOrderPosition\": " + this.m_moveOrderPosition + ", ";
+         ownedMinionData += "\"hasMovedOnThisTurn\": " + this.m_hasMovedOnThisTurn + ", ";
+         ownedMinionData += "\"isFrozen\": " + this.m_isFrozen + ", ";
+         ownedMinionData += "\"turnsFrozen\": " + this.m_turnsFrozen + ", ";
+         ownedMinionData += "\"isStunned\": " + this.m_isStunned + ", ";
+         ownedMinionData += "\"currChargeMove\": \"" + this.m_currChargeMove + "\", ";
+         ownedMinionData += "\"chargeAlliesItHits\": [" + this.vectorToString(this.m_chargeAlliesItHits) + "], ";
+         ownedMinionData += "\"chargeEnemiesItHits\": [" + this.vectorToString(this.m_chargeEnemiesItHits) + "], ";
+         ownedMinionData += "\"currCharge\": " + this.m_currCharge + ", ";
+         ownedMinionData += "\"currLevel\": " + this.m_currLevel + ", ";
+         ownedMinionData += "\"currExpPercentageToNextLevel\": " + this.m_currExpPercentageToNextLevel + ", ";
+         ownedMinionData += "\"allMoves\": [" + this.m_allMoves.join(", ") + "], ";
+         ownedMinionData += "\"activeMoves\": [" + this.m_activeMoves.join(", ") + "], ";
+         ownedMinionData += "\"globalMoves\": [" + this.m_globalMoves.join(", ") + "], ";
+         ownedMinionData += "\"availableTalentPoints\": " + this.m_availableTalentPoints + ", ";
+         ownedMinionData += "\"currHealthPercentage\": " + this.m_currHealthPercentage + ", ";
+         ownedMinionData += "\"currEnergyPercentage\": " + this.m_currEnergyPercentage + ", ";
+         ownedMinionData += "\"maxHealthStat\": " + this.m_maxHealthStat + ", ";
+         ownedMinionData += "\"maxEnergyStat\": " + this.m_maxEnergyStat + ", ";
+         ownedMinionData += "\"maxAttackStat\": " + this.m_maxAttackStat + ", ";
+         ownedMinionData += "\"maxHealingStat\": " + this.m_maxHealingStat + ", ";
+         ownedMinionData += "\"currCritChance\": " + this.m_currCritChance + ", ";
+         ownedMinionData += "\"currArmorModRate\": " + this.m_currArmorModRate + ", ";
+         ownedMinionData += "\"currReflectDamagePercentage\": " + this.m_currReflectDamagePercentage + ", ";
+         ownedMinionData += "\"currRedirectDamage\": " + this.m_currRedirectDamage + " ";
+         ownedMinionData += "}";
+         var baseMinionData:String = "{";
+         baseMinionData += "\"minionDexID\": " + baseMinion.m_minionDexID + ", ";
+         baseMinionData += "\"baseMinionName\": \"" + baseMinion.m_baseMinionName + "\", ";
+         baseMinionData += "\"minionBattleSprite\": \"" + baseMinion.m_minionBattleSprite + "\", ";
+         baseMinionData += "\"minionIconPositioningX\": " + baseMinion.m_minionIconPositioningX + ", ";
+         baseMinionData += "\"minionIconPositioningY\": " + baseMinion.m_minionIconPositioningY + ", ";
+         baseMinionData += "\"baseHealth\": " + baseMinion.m_baseHealth + ", ";
+         baseMinionData += "\"baseEnergy\": " + baseMinion.m_baseEnergy + ", ";
+         baseMinionData += "\"baseAttack\": " + baseMinion.m_baseAttack + ", ";
+         baseMinionData += "\"baseHealing\": " + baseMinion.m_baseHealing + ", ";
+         baseMinionData += "\"baseSpeed\": " + baseMinion.m_baseSpeed + ", ";
+         baseMinionData += "\"expGainRate\": " + baseMinion.m_expGainRate + ", ";
+         baseMinionData += "\"minionType1\": " + baseMinion.m_minionType1 + ", ";
+         baseMinionData += "\"minionType2\": " + baseMinion.m_minionType2 + ", ";
+         baseMinionData += "\"numberOfGems\": " + baseMinion.m_numberOfGems + ", ";
+         baseMinionData += "\"numberOfLockedGems\": " + baseMinion.m_numberOfLockedGems + ", ";
+         baseMinionData += "\"evolutionLevel\": " + baseMinion.m_evolutionLevel + ", ";
+         baseMinionData += "\"spealizationMoves\": [" + baseMinion.m_spealizationMoves.join(", ") + "], ";
+         baseMinionData += "\"startingMoves\": [" + baseMinion.m_startingMoves.join(", ") + "]";
+         baseMinionData += "}";
+         return "{ \"ownedMinion\": " + ownedMinionData + ", \"baseMinion\": " + baseMinionData + " }";
+      }
+      
+      private function vectorToString(vector:*) : String  // converts a vector to a string. Possibly make a Singleton function
+      {
+         var result:Array = [];
+         var i:int = 0;
+         if(vector == null)
+         {
+            return "null";
+         }
+         while(i < vector.length)
+         {
+            if(vector[i] != null)
+            {
+               result.push("\"" + vector[i].toString() + "\"");
+            }
+            else
+            {
+               result.push("null");
+            }
+            i++;
+         }
+         return result.join(", ");
+      }
+
       public function get m_baseMinion() : BaseMinion
       {
          return Singleton.staticData.GetBaseMinion(this.m_minionDexID);
@@ -519,7 +662,7 @@ package Minions
          return _loc4_;
       }
       
-      private function GetPassiveIncreasePercentageForStat(param1:int) : Number
+      private function GetPassiveIncreasePercentageForStat(param1:int) : Number //finds passive moves that affect for a stat, including globals from other minions and personal passives.
       {
          var _loc3_:BaseMinionMove = null;
          var _loc5_:Vector.<int> = null;
@@ -573,11 +716,15 @@ package Minions
          this.m_currentExp = param1 * 1000;
       }
       
-      public function ReFillHealthAndEnergy() : void
+      public function ReFillHealthAndEnergy(bypass:Boolean = true) : void
       {
          this.ClearBuffsAndDebuffs();
          this.CalculateCurrStats();
-         this.m_currHealth = this.m_currHealthStat;
+
+         var blockNatural:Boolean = Singleton.dynamicData.m_isMod["no_natural_regen"] === true;
+         if (bypass || !blockNatural) {
+            this.m_currHealth = this.m_currHealthStat;
+         }
          this.m_currEnergy = this.m_currEnergyStat;
       }
       
@@ -1059,7 +1206,7 @@ package Minions
       public function set m_currHealth(param1:int) : void
       {
          this._currHealth = param1;
-         if(this._currHealth > this.m_currHealthStat)
+         if(this._currHealth > this.m_currHealthStat && Singleton.dynamicData.m_isMod["no_natural_regen"] == false)
          {
             this._currHealth = this.m_currHealthStat;
          }
@@ -1179,10 +1326,11 @@ package Minions
       public function SaveMinionAtSlot(param1:int) : void
       {
          Singleton.dynamicData.m_sharedObject.data["minion" + param1] = true;
-         Singleton.dynamicData.m_sharedObject.data["minion" + param1 + "dexID"] = this.m_minionDexID;
+         //Singleton.dynamicData.m_sharedObject.data["minion" + param1 + "dexID"] = this.m_minionDexID; //implemented externally
          Singleton.dynamicData.m_sharedObject.data["minion" + param1 + "name"] = this.m_minionName;
          Singleton.dynamicData.m_sharedObject.data["minion" + param1 + "exp"] = this.m_currentExp;
          Singleton.dynamicData.m_sharedObject.data["minion" + param1 + "statBonus"] = this.m_statBonus;
+         Singleton.dynamicData.m_sharedObject.data["minion" + param1 + "currHealth"] = this._currHealth;
          var _loc2_:int = 0;
          while(_loc2_ < this._allMoves.length)
          {
@@ -1205,12 +1353,20 @@ package Minions
          }
       }
       
-      public function CreateMinionFromSlot(param1:int) : void
+      public function CreateMinionFromSlot(param1:int,param2:int) : void //this rights the values of base minion loading. Added param2 as a flag for whether the minion is a mod
       {
-         this.m_minionDexID = Singleton.dynamicData.m_sharedObject.data["minion" + param1 + "dexID"];
+         if(param2 != 1)
+         {
+            this.m_minionDexID = param2;   //uses our special ModToDexID (passed in as param2) 
+         }
+         else
+         {
+            this.m_minionDexID = Singleton.dynamicData.m_sharedObject.data["minion" + param1 + "dexID"];
+         }
          this.m_minionName = Singleton.dynamicData.m_sharedObject.data["minion" + param1 + "name"];
          this.m_currentExp = Singleton.dynamicData.m_sharedObject.data["minion" + param1 + "exp"];
          this.m_statBonus = Singleton.dynamicData.m_sharedObject.data["minion" + param1 + "statBonus"];
+         this.m_currHealth = Singleton.dynamicData.m_sharedObject.data["minion" + param1 + "currHealth"];
          var _loc2_:int = 0;
          while(_loc2_ < this._allMoves.length)
          {
