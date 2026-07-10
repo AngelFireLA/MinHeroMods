@@ -26,7 +26,7 @@ package TopDown.Trainers
          this.m_extraHardModeModifier = Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER;
       }
       
-      /** UNCOMMENT WHEN NEEDED
+      /* UNCOMMENT WHEN NEEDED
 
       //inserting Ice Floor stuff here:
       public function CreateIceFloor(): void
