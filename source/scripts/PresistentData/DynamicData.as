@@ -608,30 +608,63 @@ package PresistentData
          return _loc1_;
       }
 
+      private function DoesTrainerAwardTowerStars(param1:int, param2:int) : Boolean
+      {
+         // Normal floors contain six trainer slots, but their optional hard and
+         // expert rooms (zero-based slots 3 and 4) do not count toward the 12
+         // tower stars. Hard-mode floors award stars for all six slots (18).
+         return param1 >= Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER || param2 != 3 && param2 != 4;
+      }
+
       private function RecoverMissingTrainerStars() : void
       {
-         if(this.CalculateTotalNumberOfStars() != 0)
-         {
-            return;
-         }
-         var expectedTotal:int = Math.max(this.m_totalStars[this.m_saveSlot],this.m_numOfSpentStars);
+         // Keep the total that existed before repairing placement. This also
+         // repairs saves written by the old recovery code, which put 18/12 on
+         // normal floors and consequently stopped before later hard floors.
+         var expectedTotal:int = Math.max(this.m_totalStars[this.m_saveSlot],this.m_numOfSpentStars,this.CalculateTotalNumberOfStars());
          if(expectedTotal <= 0)
          {
             return;
          }
 
-         var remaining:int = expectedTotal;
          var floor:int = 0;
          var trainer:int = 0;
          var award:int = 0;
 
+         // Remove impossible stars from the two non-scoring normal-floor rooms.
+         // expectedTotal deliberately remains unchanged so they can be moved to
+         // the valid trainer/floor slots they displaced during old recovery.
+         while(floor < Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER)
+         {
+            trainer = 0;
+            while(trainer < this.m_bestTrainerStarCounts[floor].length)
+            {
+               if(!this.DoesTrainerAwardTowerStars(floor,trainer))
+               {
+                  this.m_currTrainerStarCounts[floor][trainer] = 0;
+                  this.m_bestTrainerStarCounts[floor][trainer] = 0;
+               }
+               trainer++;
+            }
+            floor++;
+         }
+
+         var remaining:int = expectedTotal - this.CalculateTotalNumberOfStars();
+         if(remaining <= 0)
+         {
+            this.m_totalStars[this.m_saveSlot] = this.CalculateTotalNumberOfStars();
+            this.CalculateTotatNumberOfAvailbleStars();
+            return;
+         }
+
          // Prefer trainer completion flags when they survived the old reload bug.
+         floor = 0;
          while(floor < this.m_hasBeatenTrainer.length && remaining > 0)
          {
             trainer = 0;
             while(trainer < this.m_hasBeatenTrainer[floor].length && remaining > 0)
             {
-               if(this.m_hasBeatenTrainer[floor][trainer])
+               if(this.DoesTrainerAwardTowerStars(floor,trainer) && this.m_hasBeatenTrainer[floor][trainer] && this.m_bestTrainerStarCounts[floor][trainer] == 0)
                {
                   award = Math.min(3,remaining);
                   this.m_currTrainerStarCounts[floor][trainer] = award;
@@ -652,7 +685,7 @@ package PresistentData
                trainer = 0;
                while(trainer < this.m_bestTrainerStarCounts[floor].length && remaining > 0)
                {
-                  if(this.m_bestTrainerStarCounts[floor][trainer] == 0)
+                  if(this.DoesTrainerAwardTowerStars(floor,trainer) && this.m_bestTrainerStarCounts[floor][trainer] == 0)
                   {
                      award = Math.min(3,remaining);
                      this.m_currTrainerStarCounts[floor][trainer] = award;
@@ -674,7 +707,7 @@ package PresistentData
             trainer = 0;
             while(trainer < this.m_bestTrainerStarCounts[floor].length && remaining > 0)
             {
-               if(this.m_bestTrainerStarCounts[floor][trainer] == 0)
+               if(this.DoesTrainerAwardTowerStars(floor,trainer) && this.m_bestTrainerStarCounts[floor][trainer] == 0)
                {
                   award = Math.min(3,remaining);
                   this.m_currTrainerStarCounts[floor][trainer] = award;

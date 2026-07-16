@@ -295,8 +295,15 @@ def main():
         add_new_scripts_with_retries(new_scripts, working_swf)
         run_jpexs("-importScript", working_swf, scripts_swf, ROOT / "modified")
         run_jpexs("-importImages", scripts_swf, images_swf, ROOT / "modified")
-        run_jpexs("-importSymbolClass", images_swf, final_swf, SYMBOLS_FILE.parent)
-        shutil.copy2(final_swf, OUTPUT_SWF)
+
+        # Do not round-trip the exported symbols.csv here. Min Hero has multiple
+        # SymbolClass tags/timelines that legitimately reuse character IDs. In
+        # particular, ID 5 is Preloader_LOADER_FONT in the preloader and
+        # Utilities.SpriteHandler_MAIN_FONT in the main timeline. JPEXS's flat
+        # CSV importer applies the last ID mapping to both tags, which makes the
+        # preloader throw Error #1065 before the main SpriteHandler ABC loads.
+        # -addImage -class above already registers every newly added image.
+        shutil.copy2(images_swf, OUTPUT_SWF)
 
     print(f"Build completed: {OUTPUT_SWF}")
 
