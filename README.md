@@ -19,7 +19,10 @@ Ready to upgrade? Here's how to, but first a few checks:
   * To enable mods in it, see the section "Adding Mods to Save Manually" in guides.md
 
 ### MOD TOGGLES
-You can only toggle mods at the beginning of a save.
+Mods can be changed after creating a save from **Settings > Mods**. Changes are saved immediately and take effect after restarting the SWF.
+
+Rule mods such as Nuzlocke, No Regen, and Infinite Tower can always be switched. Content mods can be enabled later, but the menu will not let you disable a species or floor while that save owns one of its minions.
+
 Due to the method that I have constructed the mod toggles, you can toggle the minion corresponding to a "species" toggle all of them. Make sure to double-check if the minions are actually there! You can do this by immediately opening the Minionpedia, and seeing how many extra minions beyond 101 there are. This should correspond to the number of minions you added. For example, adding Zanyu, and Stingaray, would mean 3 extra minions, so if you don't see a number 104, then you've not actually toggled them!
 
 ## CURRENT VERSION:

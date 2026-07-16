@@ -2,10 +2,10 @@ from PIL import Image
 import zlib
 import subprocess
 # Need to have been extracted using the extract_from_swf.bat script.
-minion_dex_id_path = "source\scripts\States\MinionDexID.as"
-all_minions_container_path = "source\scripts\Minions\AllMinionsContainer.as"
-symbol_classes_path = "source\symbolClass\symbols.csv"
-images_folder_path = "source\images"
+minion_dex_id_path = r"source\scripts\States\MinionDexID.as"
+all_minions_container_path = r"source\scripts\Minions\AllMinionsContainer.as"
+symbol_classes_path = r"source\symbolClass\symbols.csv"
+images_folder_path = r"source\images"
 
 # Path to your minion's image
 new_minion_image_path = r"C:\Dev\basard\Min Hero\MinHeroMods\eevee_minion.png"

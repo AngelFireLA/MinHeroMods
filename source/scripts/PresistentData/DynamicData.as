@@ -182,17 +182,7 @@ package PresistentData
             _loc1_++;
          }
          this.ResetThePlayersBattleModMinions();
-         this.m_currTrainerStarCounts = new Vector.<Vector.<int>>();
-         this.m_bestTrainerStarCounts = new Vector.<Vector.<int>>();
-         this.m_hasBeatenTrainer = new Vector.<Vector.<Boolean>>();
-         _loc1_ = 0;
-         while(_loc1_ < Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER + Singleton.staticData.NUM_OF_FLOORS_IN_THE_HARD_TOWER)
-         {
-            this.m_currTrainerStarCounts[_loc1_] = new Vector.<int>();
-            this.m_bestTrainerStarCounts[_loc1_] = new Vector.<int>();
-            this.m_hasBeatenTrainer[_loc1_] = new Vector.<Boolean>();
-            _loc1_++;
-         }
+         this.ResetTrainerProgressArrays();
          this.m_hasBeatenFloor = new Vector.<Boolean>();
          this.m_animateNewFloorActive = new Vector.<Boolean>(4);
          this.m_characterNames = new Vector.<String>(3);
@@ -222,6 +212,44 @@ package PresistentData
             i++;
          }
          trace("Done initial mod profile")
+      }
+
+      public function ResetTrainerProgressArrays() : void
+      {
+         this.m_currTrainerStarCounts = new Vector.<Vector.<int>>();
+         this.m_bestTrainerStarCounts = new Vector.<Vector.<int>>();
+         this.m_hasBeatenTrainer = new Vector.<Vector.<Boolean>>();
+         var i:int = 0;
+         while(i < Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER + Singleton.staticData.NUM_OF_FLOORS_IN_THE_HARD_TOWER)
+         {
+            this.m_currTrainerStarCounts[i] = new Vector.<int>();
+            this.m_bestTrainerStarCounts[i] = new Vector.<int>();
+            this.m_hasBeatenTrainer[i] = new Vector.<Boolean>();
+            i++;
+         }
+      }
+
+      public function HasOwnedMinionFromMods(param1:Array) : Boolean
+      {
+         var i:int = 0;
+         var j:int = 0;
+         while(i < this.m_ownedMinions.length)
+         {
+            if(this.m_ownedMinions[i] != null)
+            {
+               j = 0;
+               while(j < param1.length)
+               {
+                  if(this.m_ownedMinions[i].ModName == param1[j])
+                  {
+                     return true;
+                  }
+                  j++;
+               }
+            }
+            i++;
+         }
+         return false;
       }
       
       private function onDataReceived(event:DataEvent) : void
@@ -578,6 +606,89 @@ package PresistentData
             _loc2_++;
          }
          return _loc1_;
+      }
+
+      private function RecoverMissingTrainerStars() : void
+      {
+         if(this.CalculateTotalNumberOfStars() != 0)
+         {
+            return;
+         }
+         var expectedTotal:int = Math.max(this.m_totalStars[this.m_saveSlot],this.m_numOfSpentStars);
+         if(expectedTotal <= 0)
+         {
+            return;
+         }
+
+         var remaining:int = expectedTotal;
+         var floor:int = 0;
+         var trainer:int = 0;
+         var award:int = 0;
+
+         // Prefer trainer completion flags when they survived the old reload bug.
+         while(floor < this.m_hasBeatenTrainer.length && remaining > 0)
+         {
+            trainer = 0;
+            while(trainer < this.m_hasBeatenTrainer[floor].length && remaining > 0)
+            {
+               if(this.m_hasBeatenTrainer[floor][trainer])
+               {
+                  award = Math.min(3,remaining);
+                  this.m_currTrainerStarCounts[floor][trainer] = award;
+                  this.m_bestTrainerStarCounts[floor][trainer] = award;
+                  remaining -= award;
+               }
+               trainer++;
+            }
+            floor++;
+         }
+
+         // Floor completion flags were stored separately and usually survived.
+         floor = 0;
+         while(floor < this.m_hasBeatenFloor.length && remaining > 0)
+         {
+            if(this.m_hasBeatenFloor[floor])
+            {
+               trainer = 0;
+               while(trainer < this.m_bestTrainerStarCounts[floor].length && remaining > 0)
+               {
+                  if(this.m_bestTrainerStarCounts[floor][trainer] == 0)
+                  {
+                     award = Math.min(3,remaining);
+                     this.m_currTrainerStarCounts[floor][trainer] = award;
+                     this.m_bestTrainerStarCounts[floor][trainer] = award;
+                     this.m_hasBeatenTrainer[floor][trainer] = true;
+                     remaining -= award;
+                  }
+                  trainer++;
+               }
+            }
+            floor++;
+         }
+
+         // If the old broken save already overwrote both completion arrays, preserve
+         // the authoritative total even though exact room placement is unrecoverable.
+         floor = 0;
+         while(floor < this.m_bestTrainerStarCounts.length && remaining > 0)
+         {
+            trainer = 0;
+            while(trainer < this.m_bestTrainerStarCounts[floor].length && remaining > 0)
+            {
+               if(this.m_bestTrainerStarCounts[floor][trainer] == 0)
+               {
+                  award = Math.min(3,remaining);
+                  this.m_currTrainerStarCounts[floor][trainer] = award;
+                  this.m_bestTrainerStarCounts[floor][trainer] = award;
+                  this.m_hasBeatenTrainer[floor][trainer] = true;
+                  remaining -= award;
+               }
+               trainer++;
+            }
+            floor++;
+         }
+         this.m_totalStars[this.m_saveSlot] = this.CalculateTotalNumberOfStars();
+         this.CalculateTotatNumberOfAvailbleStars();
+         trace("Recovered trainer stars from save metadata: " + this.m_totalStars[this.m_saveSlot]);
       }
       
       public function ResetThePlayersBattleModMinions() : void
@@ -1580,6 +1691,26 @@ package PresistentData
          this.SetInitialValue("_currSettingMinionID",0);
          this.SetInitialValue("m_areTutorialsOn",true);
          this.SetInitialValue("m_graphicsLevel",2);
+         if(param2)
+         {
+            _loc6_ = 0;
+            while(_loc6_ < Singleton.staticData.m_all_mods.length)
+            {
+               this.SetInitialValue("m_isMod",Singleton.staticData.m_all_mods[_loc6_]);
+               _loc6_++;
+            }
+            trace("dynamicData has the following mod configuration:");
+            for (var k:Object in this.m_isMod) {
+               var value:Boolean = this.m_isMod[k];
+               var key:String = k;
+               trace(" - " + key + ": " + value);
+            }
+
+            // Trainer definitions create the progress slots. Rebuild those slots before
+            // reading star data so a reload cannot append zeros or skip saved stars.
+            this.ResetTrainerProgressArrays();
+            Singleton.staticData.CreateFinalInitialThings(this.m_isMod);
+         }
          var _loc3_:int = 0;
          while(_loc3_ < this.m_starUpgradeAmounts.length)
          {
@@ -1605,6 +1736,10 @@ package PresistentData
             this.SetInitialValue("m_hasBeatenFloor",false,_loc3_);
             _loc3_++;
          }
+         if(param2)
+         {
+            this.RecoverMissingTrainerStars();
+         }
          var _loc5_:int = 0;
          while(_loc5_ < 4)
          {
@@ -1625,19 +1760,6 @@ package PresistentData
          }
          if(param2)
          {
-            _loc6_ = 0;
-            while(_loc6_ < Singleton.staticData.m_all_mods.length)
-            {
-               this.SetInitialValue("m_isMod",Singleton.staticData.m_all_mods[_loc6_]);
-               _loc6_++;
-            }
-            trace("dynamicData has the following mod configuration:");
-            for (var k:Object in this.m_isMod) {
-               var value:Boolean = this.m_isMod[k];
-               var key:String = k;
-               trace(" - " + key + ": " + value);
-            }
-            Singleton.staticData.CreateFinalInitialThings(this.m_isMod);
             this.m_minionsOwned = new Vector.<Boolean>(Singleton.staticData.m_TOTAL_MINIONS);
             this.m_minionsSeen = new Vector.<Boolean>(Singleton.staticData.m_TOTAL_MINIONS);
             _loc6_ = 0;

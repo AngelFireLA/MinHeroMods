@@ -194,6 +194,11 @@ package PresistentData
       {
          //param1 is m_isMod
 
+         // A save can be selected more than once in the same Flash session. Trainer
+         // definitions must be replaced, not appended, or progress arrays drift out
+         // of alignment with their saved floor/trainer keys.
+         this.m_trainerSystem = new TrainerSystem();
+
          //1st step: Creation the ModToDexID mapping
          this.ModToDexID = new Dictionary();
          trace("Building Minion DexID mapping...")
