@@ -112,6 +112,16 @@ def ensure_sprite_handler_source(class_name, image_name):
             encoding="utf-8",
         )
         print(f"Created image wrapper: {wrapper_path.relative_to(SOURCE_FOLDER)}")
+    else:
+        wrapper_source = wrapper_path.read_text(encoding="utf-8")
+        embed_pattern = re.compile(r'\[Embed\(source="/_assets/[^"\r\n]+"\)\]')
+        expected_embed = f'[Embed(source="/_assets/{image_name}")]'
+        if expected_embed not in wrapper_source:
+            if not embed_pattern.search(wrapper_source):
+                raise BuildError(f"Cannot find Embed metadata in {wrapper_path}")
+            wrapper_source = embed_pattern.sub(expected_embed, wrapper_source, count=1)
+            wrapper_path.write_text(wrapper_source, encoding="utf-8")
+            print(f"Updated image wrapper: {wrapper_path.relative_to(SOURCE_FOLDER)}")
 
     main_handler_path = SOURCE_FOLDER / "scripts" / "Utilities" / "SpriteHandler.as"
     main_handler_source = main_handler_path.read_text(encoding="utf-8")
@@ -206,18 +216,28 @@ def parse_new_image(path):
     return int(match.group("character_id")), match.group("class_name")
 
 
-def add_new_scripts_with_retries(script_paths, working_swf):
+def add_new_scripts_with_retries(script_paths, working_swf, temp_folder):
     """Retry scripts so simple dependencies between new classes can resolve."""
     pending = list(script_paths)
     last_errors = {}
+    output_index = 0
     while pending:
         made_progress = False
         for script_path in pending[:]:
+            candidate_swf = temp_folder / f"added_script_{output_index}.swf"
+            output_index += 1
             try:
-                run_jpexs("-addScript", script_path, working_swf, working_swf, capture=True)
+                run_jpexs(
+                    "-addScript",
+                    script_path,
+                    working_swf,
+                    candidate_swf,
+                    capture=True,
+                )
             except BuildError as error:
                 last_errors[script_path] = str(error)
                 continue
+            working_swf = candidate_swf
             print(f"Added new script: {script_path.relative_to(SOURCE_FOLDER)}")
             pending.remove(script_path)
             made_progress = True
@@ -227,6 +247,7 @@ def add_new_scripts_with_retries(script_paths, working_swf):
                 for path in pending
             )
             raise BuildError(f"Could not compile new AS3 scripts:\n{details}")
+    return working_swf
 
 
 def backup_current_output():
@@ -278,8 +299,10 @@ def main():
         final_swf = temp_folder / "final.swf"
         shutil.copy2(ORIGINAL_SWF, working_swf)
 
-        for image_path in new_images:
+        asset_swf = working_swf
+        for image_index, image_path in enumerate(new_images):
             character_id, class_name = parse_new_image(image_path)
+            image_output_swf = temp_folder / f"added_image_{image_index}.swf"
             run_jpexs(
                 "-addImage",
                 "-characterId",
@@ -287,13 +310,14 @@ def main():
                 "-class",
                 class_name,
                 image_path,
-                working_swf,
-                working_swf,
+                asset_swf,
+                image_output_swf,
             )
+            asset_swf = image_output_swf
             print(f"Added new image: {image_path.relative_to(SOURCE_FOLDER)}")
 
-        add_new_scripts_with_retries(new_scripts, working_swf)
-        run_jpexs("-importScript", working_swf, scripts_swf, ROOT / "modified")
+        asset_swf = add_new_scripts_with_retries(new_scripts, asset_swf, temp_folder)
+        run_jpexs("-importScript", asset_swf, scripts_swf, ROOT / "modified")
         run_jpexs("-importImages", scripts_swf, images_swf, ROOT / "modified")
 
         # Do not round-trip the exported symbols.csv here. Min Hero has multiple
