@@ -469,6 +469,20 @@ package TopDown.Trainers
          Singleton.dynamicData.AddTrainerStarCountToFloor(param2);
          return _loc4_;
       }
+
+      public function DoesTrainerAwardTowerStars(param1:int, param2:int) : Boolean
+      {
+         if(param1 < 0 || param1 >= this.m_trainers.length || param2 < 0 || param2 >= this.m_trainers[param1].length)
+         {
+            return false;
+         }
+         if(param1 >= Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER)
+         {
+            return true;
+         }
+         var _loc3_:int = this.m_trainers[param1][param2].m_trainerType;
+         return _loc3_ != TrainerType.HARD_TRAINER && _loc3_ != TrainerType.EXPERT_TRAINER;
+      }
       
       private function CreateFloor1() : void
       {

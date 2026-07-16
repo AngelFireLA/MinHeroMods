@@ -610,31 +610,18 @@ package PresistentData
 
       private function DoesTrainerAwardTowerStars(param1:int, param2:int) : Boolean
       {
-         // Normal floors contain six trainer slots, but their optional hard and
-         // expert rooms (zero-based slots 3 and 4) do not count toward the 12
-         // tower stars. Hard-mode floors award stars for all six slots (18).
-         return param1 >= Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER || param2 != 3 && param2 != 4;
+         return Singleton.staticData.m_trainerSystem.DoesTrainerAwardTowerStars(param1,param2);
       }
 
       private function RecoverMissingTrainerStars() : void
       {
-         // Keep the total that existed before repairing placement. This also
-         // repairs saves written by the old recovery code, which put 18/12 on
-         // normal floors and consequently stopped before later hard floors.
-         var expectedTotal:int = Math.max(this.m_totalStars[this.m_saveSlot],this.m_numOfSpentStars,this.CalculateTotalNumberOfStars());
-         if(expectedTotal <= 0)
-         {
-            return;
-         }
-
          var floor:int = 0;
          var trainer:int = 0;
-         var award:int = 0;
 
-         // Remove impossible stars from the two non-scoring normal-floor rooms.
-         // expectedTotal deliberately remains unchanged so they can be moved to
-         // the valid trainer/floor slots they displaced during old recovery.
-         while(floor < Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER)
+         // Trainer definitions are authoritative about which rooms award tower
+         // stars. In normal mode, optional hard/expert rooms do not; every
+         // trainer in hard mode does. Clear values fabricated in invalid rooms.
+         while(floor < this.m_bestTrainerStarCounts.length)
          {
             trainer = 0;
             while(trainer < this.m_bestTrainerStarCounts[floor].length)
@@ -649,71 +636,19 @@ package PresistentData
             floor++;
          }
 
-         var remaining:int = expectedTotal - this.CalculateTotalNumberOfStars();
-         if(remaining <= 0)
-         {
-            this.m_totalStars[this.m_saveSlot] = this.CalculateTotalNumberOfStars();
-            this.CalculateTotatNumberOfAvailbleStars();
-            return;
-         }
-
-         // Prefer trainer completion flags when they survived the old reload bug.
+         // Only a trainer's saved completion flag proves that its missing score
+         // should be restored. m_hasBeatenFloor is actually the floor-unlocked
+         // array, despite its name, so it must never be used to manufacture stars.
          floor = 0;
-         while(floor < this.m_hasBeatenTrainer.length && remaining > 0)
+         while(floor < this.m_hasBeatenTrainer.length)
          {
             trainer = 0;
-            while(trainer < this.m_hasBeatenTrainer[floor].length && remaining > 0)
+            while(trainer < this.m_hasBeatenTrainer[floor].length)
             {
                if(this.DoesTrainerAwardTowerStars(floor,trainer) && this.m_hasBeatenTrainer[floor][trainer] && this.m_bestTrainerStarCounts[floor][trainer] == 0)
                {
-                  award = Math.min(3,remaining);
-                  this.m_currTrainerStarCounts[floor][trainer] = award;
-                  this.m_bestTrainerStarCounts[floor][trainer] = award;
-                  remaining -= award;
-               }
-               trainer++;
-            }
-            floor++;
-         }
-
-         // Floor completion flags were stored separately and usually survived.
-         floor = 0;
-         while(floor < this.m_hasBeatenFloor.length && remaining > 0)
-         {
-            if(this.m_hasBeatenFloor[floor])
-            {
-               trainer = 0;
-               while(trainer < this.m_bestTrainerStarCounts[floor].length && remaining > 0)
-               {
-                  if(this.DoesTrainerAwardTowerStars(floor,trainer) && this.m_bestTrainerStarCounts[floor][trainer] == 0)
-                  {
-                     award = Math.min(3,remaining);
-                     this.m_currTrainerStarCounts[floor][trainer] = award;
-                     this.m_bestTrainerStarCounts[floor][trainer] = award;
-                     this.m_hasBeatenTrainer[floor][trainer] = true;
-                     remaining -= award;
-                  }
-                  trainer++;
-               }
-            }
-            floor++;
-         }
-
-         // If the old broken save already overwrote both completion arrays, preserve
-         // the authoritative total even though exact room placement is unrecoverable.
-         floor = 0;
-         while(floor < this.m_bestTrainerStarCounts.length && remaining > 0)
-         {
-            trainer = 0;
-            while(trainer < this.m_bestTrainerStarCounts[floor].length && remaining > 0)
-            {
-               if(this.DoesTrainerAwardTowerStars(floor,trainer) && this.m_bestTrainerStarCounts[floor][trainer] == 0)
-               {
-                  award = Math.min(3,remaining);
-                  this.m_currTrainerStarCounts[floor][trainer] = award;
-                  this.m_bestTrainerStarCounts[floor][trainer] = award;
-                  this.m_hasBeatenTrainer[floor][trainer] = true;
-                  remaining -= award;
+                  this.m_currTrainerStarCounts[floor][trainer] = 3;
+                  this.m_bestTrainerStarCounts[floor][trainer] = 3;
                }
                trainer++;
             }
@@ -721,7 +656,7 @@ package PresistentData
          }
          this.m_totalStars[this.m_saveSlot] = this.CalculateTotalNumberOfStars();
          this.CalculateTotatNumberOfAvailbleStars();
-         trace("Recovered trainer stars from save metadata: " + this.m_totalStars[this.m_saveSlot]);
+         trace("Validated trainer stars from saved completion flags: " + this.m_totalStars[this.m_saveSlot]);
       }
       
       public function ResetThePlayersBattleModMinions() : void

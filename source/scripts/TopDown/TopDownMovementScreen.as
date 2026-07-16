@@ -317,7 +317,14 @@ package TopDown
          var _loc3_:int = 0;
          this.m_muteSoundButton.m_isToggleOn = Singleton.dynamicData.m_isSoundOn;
          this.m_muteMusicButton.m_isToggleOn = Singleton.dynamicData.m_isMusicOn;
-         this.m_numOfStarsText.text = "x" + Singleton.dynamicData.GetStarsForCurrentFloor();
+         if(this.m_currLevel is Lobby)
+         {
+            this.m_numOfStarsText.text = "x0";
+         }
+         else
+         {
+            this.m_numOfStarsText.text = "x" + Singleton.dynamicData.GetStarsForCurrentFloor();
+         }
          if(Singleton.dynamicData.m_currEggeryKeys > 0)
          {
             this.m_numOfKeysText.text = "x" + (Singleton.dynamicData.m_currEggeryKeys + Singleton.dynamicData.m_currKeysOnFloor);
