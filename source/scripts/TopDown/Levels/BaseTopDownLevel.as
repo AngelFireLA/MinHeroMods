@@ -266,11 +266,11 @@ package TopDown.Levels
          }
          else if(param1 == "elevatorEntrance")
          {
-            this.AddElevatorWallCollObject("roomTransitionObject",param2,param3,param4,param5,param6);
+            this.AddElevatorWallCollObject("roomTransitionObject",param2,param3,param4,param5,param6,"vanilla");
          }
          else if(param1 == "IceFloorEntry") //Ice Floor specific entry object.
          {
-            this.AddElevatorWallCollObject("roomTransitionObject",param2,param3,param4,param5,param6);
+            this.AddElevatorWallCollObject("roomTransitionObject",param2,param3,param4,param5,param6,"icefloor");
          }
          else if(param1 == "regularDoor")
          {
@@ -1347,7 +1347,7 @@ package TopDown.Levels
          this.m_allObjects.push(_loc7_);
       }
       
-      protected function AddElevatorWallCollObject(param1:String, param2:int, param3:int, param4:Number, param5:Number, param6:Number, param7:String) : void //param7 is the elevator ID: "vanilla" or "icefloor"
+      protected function AddElevatorWallCollObject(param1:String, param2:int, param3:int, param4:Number, param5:Number, param6:Number, param7:String = "vanilla") : void //param7 is the elevator ID: "vanilla" or "icefloor"
       {
          var _loc7_:ElevatorObject = new ElevatorObject(param7);
          _loc7_.AddSpriteFirstTime(param1,param2,param3,param4,param5,param6,Singleton.utility.m_screenControllers.m_topDownScreen.m_topDownMovementScreen.m_bottomVisualLayer,false);

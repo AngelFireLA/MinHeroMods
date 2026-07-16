@@ -359,6 +359,97 @@ package TopDown.Trainers
          }
          return _loc3_;
       }
+
+      public function GetInfiniteTowerTrainerCount(param1:int) : int
+      {
+         var _loc2_:int = 0;
+         var _loc3_:int = Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER - 1;
+         if(param1 == 1)
+         {
+            _loc2_ = Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER;
+            _loc3_ = this.m_trainers.length - 1;
+         }
+         else if(param1 == 2)
+         {
+            _loc3_ = this.m_trainers.length - 1;
+         }
+         var _loc4_:int = 0;
+         var _loc5_:int = _loc2_;
+         while(_loc5_ <= _loc3_)
+         {
+            _loc4_ += this.m_trainers[_loc5_].length;
+            _loc5_++;
+         }
+         return _loc4_;
+      }
+
+      public function LoadInfiniteTowerTrainer(param1:int, param2:int) : TrainerDataObject
+      {
+         var _loc3_:int = this.GetInfiniteTowerTrainerCount(param1);
+         if(_loc3_ < 1)
+         {
+            return null;
+         }
+         if(param2 < 1 || param2 > _loc3_)
+         {
+            return null;
+         }
+         var _loc4_:int = param2 - 1;
+         var _loc5_:int = 0;
+         var _loc6_:int = Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER - 1;
+         if(param1 == 1)
+         {
+            _loc5_ = Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER;
+            _loc6_ = this.m_trainers.length - 1;
+         }
+         else if(param1 == 2)
+         {
+            _loc6_ = this.m_trainers.length - 1;
+         }
+         var _loc7_:TrainerDataObject = null;
+         var _loc8_:int = _loc5_;
+         while(_loc8_ <= _loc6_)
+         {
+            if(_loc4_ < this.m_trainers[_loc8_].length)
+            {
+               _loc7_ = this.m_trainers[_loc8_][_loc4_];
+               Singleton.dynamicData.m_currFloorOfTower = _loc8_;
+               break;
+            }
+            _loc4_ -= this.m_trainers[_loc8_].length;
+            _loc8_++;
+         }
+         if(_loc7_ == null)
+         {
+            return null;
+         }
+         Singleton.dynamicData.ResetOpponentsMinions();
+         Singleton.dynamicData.m_currTrainerID = _loc7_.m_trainerRoomID;
+         Singleton.dynamicData.m_currTrainerData = _loc7_;
+         var _loc9_:TrainerMinionDataObject = null;
+         var _loc10_:OwnedMinion = null;
+         var _loc11_:int = 0;
+         while(_loc11_ < _loc7_.m_minions.length)
+         {
+            _loc9_ = _loc7_.m_minions[_loc11_];
+            _loc10_ = new OwnedMinion(_loc9_.m_minionID,false);
+            _loc10_.m_trainerType = _loc7_.m_trainerType;
+            if(Singleton.dynamicData.m_currFloorOfTower < Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER)
+            {
+               _loc10_.SetLevel(Singleton.staticData.GetTrainerMinionLevelFor(Singleton.dynamicData.m_currFloorOfTower) + _loc7_.m_extraMinionLevels);
+            }
+            else
+            {
+               _loc10_.SetLevel(Singleton.staticData.GetTrainerMinionLevelFor(Singleton.dynamicData.m_currFloorOfTower));
+            }
+            Singleton.utility.AutoBuildMovesForMinion(_loc10_,_loc9_.m_moves);
+            _loc10_.CalculateCurrStats();
+            _loc10_.ReFillHealthAndEnergy();
+            Singleton.dynamicData.m_opponentsMinions[_loc11_] = _loc10_;
+            _loc11_++;
+         }
+         return _loc7_;
+      }
       
       public function GetCurrentTrainer() : TrainerDataObject
       {

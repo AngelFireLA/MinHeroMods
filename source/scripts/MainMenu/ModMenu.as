@@ -49,7 +49,7 @@ package MainMenu
       {
          super();
          this.m_toggleTexts = new Vector.<String>();
-         this.m_toggleTexts.push("Zanyu","Stingaray","Arkvian","Ophan", "Ice Floor", "Nuzlocke", "No Regen"); //still need this for ordering. Make as small as possibe
+         this.m_toggleTexts.push("Zanyu","Stingaray","Arkvian","Ophan", "Ice Floor", "Nuzlocke", "No Regen", "Infinite Tower"); //still need this for ordering. Make as small as possibe
          this.m_toggleDict = new Dictionary();
          this.m_toggleDict["Example"] = ["Tooltip description about the Example mod.", "Toggle1 (the minion)", "Extra toggles like this"];
          this.m_toggleDict["Zanyu"] = ["Bring the might of the legendary beast to your team! Featuring a custom Skill Tree, and powerful moves, they can be found in Floor 5-2!", "dirtFish"];
@@ -59,6 +59,7 @@ package MainMenu
          this.m_toggleDict["Ice Floor"] = ["The Ice Floor is now available. Adventure through this chilly domain through the side entrance, and discover new minions, moves and Trainers!", "iMammoth1", "iMammoth2", "iMammoth3","iUnicorn1","iUnicorn2", "iUnicorn3", "iSloth1", "iSloth2", "iSloth3", "iSeal1", "iSeal2", "iSeal3", "iceFloor"] //toggles are all Ice Floor minion mods (used for DexID), and the general-purpose "iceFloor" toggle
          this.m_toggleDict["Nuzlocke"] = ["If your minion faints, it's gone for good!", "nuzlocke"];
          this.m_toggleDict["No Regen"] = ["Your Minions will not regenerate their health naturally except between floors.", "no_natural_regen"];
+         this.m_toggleDict["Infinite Tower"] = ["Open the sealed right-hand lobby door and challenge every trainer in an endless survival run.", "infiniteTower"];
       }
       
       public function LoadSprites() : void
@@ -186,7 +187,7 @@ package MainMenu
          var i:int = 0;
          while(i < this.m_toggleButtons.length)
          {
-            this.m_toggleButtons[i].m_isToggleOn = Singleton.dynamicData.m_isMod[Singleton.staticData.m_all_mods[i]];
+            this.m_toggleButtons[i].m_isToggleOn = this.GetToggleState(this.m_toggleTexts[i]);
             i++;
          }
 
@@ -201,6 +202,15 @@ package MainMenu
          this.UpdateTheScrollBoxPosition();
 
          trace("[ModMenu] BringIn: total=" + m_totalItems + " scrollMax=" + m_scrollMax);
+      }
+
+      private function GetToggleState(param1:String) : Boolean
+      {
+         if(this.m_toggleDict[param1] == null || this.m_toggleDict[param1].length < 2)
+         {
+            return false;
+         }
+         return Boolean(Singleton.dynamicData.m_isMod[this.m_toggleDict[param1][1]]);
       }
 
       public function ToggleCarousel(param1:String) : void

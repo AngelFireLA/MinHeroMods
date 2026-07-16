@@ -71,10 +71,10 @@ package TopDown.Menus
          this.m_settingsTitle.y = 40;
          this.m_settingsTitle.selectable = false;
          addChild(this.m_settingsTitle);
-         var _loc2_:Array = new Array("Sound","Music","Tips","Quality");
+         var _loc2_:Array = new Array("Sound","Music","Tips","Quality","Infinite Tower");
          var _loc3_:Array = new Array(this.SoundButtonToggled,this.MusicButtonToggled,this.TutorialsButtonToggled);
-         this.m_settingTexts = new Vector.<TextField>(4);
-         this.m_toggleButtons = new Vector.<ToggleButton>(3);
+         this.m_settingTexts = new Vector.<TextField>(5);
+         this.m_toggleButtons = new Vector.<ToggleButton>(4);
          var _loc4_:int = 0;
          while(_loc4_ < this.m_settingTexts.length)
          {
@@ -91,7 +91,7 @@ package TopDown.Menus
             this.m_settingTexts[_loc4_].y = 84 + _loc4_ * 38;
             this.m_settingTexts[_loc4_].selectable = false;
             addChild(this.m_settingTexts[_loc4_]);
-            if(_loc4_ < this.m_toggleButtons.length)
+            if(_loc4_ < 3)
             {
                this.m_toggleButtons[_loc4_] = new ToggleButton(_loc3_[_loc4_],"menus_settings_onButton","menus_settings_offButton");
                this.m_toggleButtons[_loc4_].x = 200;
@@ -100,6 +100,10 @@ package TopDown.Menus
             }
             _loc4_++;
          }
+         this.m_toggleButtons[3] = new ToggleButton(this.InfiniteTowerButtonToggled,"menus_settings_onButton","menus_settings_offButton");
+         this.m_toggleButtons[3].x = 200;
+         this.m_toggleButtons[3].y = 90 + 4 * 38;
+         addChild(this.m_toggleButtons[3]);
          var _loc5_:Array = new Array("menus_settings_graphicSetting_low","menus_settings_graphicSetting_mid","menus_settings_graphicSetting_high");
          this.m_graphicSettingIcons = new Vector.<Sprite>(3);
          var _loc6_:int = 0;
@@ -129,6 +133,7 @@ package TopDown.Menus
          this.m_toggleButtons[0].m_isToggleOn = Singleton.dynamicData.m_isSoundOn;
          this.m_toggleButtons[1].m_isToggleOn = Singleton.dynamicData.m_isMusicOn;
          this.m_toggleButtons[2].m_isToggleOn = Singleton.dynamicData.m_areTutorialsOn;
+         this.m_toggleButtons[3].m_isToggleOn = Boolean(Singleton.dynamicData.m_isMod["infiniteTower"]);
          this.UpdateGraphicAdjuster();
          Singleton.utility.m_screenControllers.m_topDownScreen.m_topDownMenuScreen.ApplyMenuBringInAnimationJustFade(this);
       }
@@ -171,6 +176,12 @@ package TopDown.Menus
       public function TutorialsButtonToggled() : void
       {
          Singleton.dynamicData.m_areTutorialsOn = this.m_toggleButtons[2].m_isToggleOn;
+      }
+
+      public function InfiniteTowerButtonToggled() : void
+      {
+         Singleton.dynamicData.m_isMod["infiniteTower"] = this.m_toggleButtons[3].m_isToggleOn;
+         Singleton.dynamicData.SaveAllData(Singleton.dynamicData.m_saveSlot);
       }
       
       public function NextGraphicSetting(param1:MouseEvent) : void

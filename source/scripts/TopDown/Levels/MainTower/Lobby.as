@@ -1,7 +1,9 @@
 package TopDown.Levels.MainTower
 {
    import Minions.OwnedMinion;
+   import States.GameState;
    import States.MinionDexID;
+   import States.SpecialRoom;
    import TopDown.LevelObjects.ButtonZone;
    import TopDown.LevelObjects.ChatBox.StandardChatBox;
    import TopDown.LevelObjects.MainChar;
@@ -21,15 +23,24 @@ package TopDown.Levels.MainTower
       private var m_visualsForEgg:TitanVisualsForEgg;
       
       private var m_visualsForEggTopLayer:TitanVisualsForEgg;
+
+      private var m_isInfiniteTowerRoom:Boolean;
       
-      public function Lobby()
+      public function Lobby(param1:Boolean = false)
       {
          super();
+         this.m_isInfiniteTowerRoom = param1;
       }
       
       override public function LoadSprites() : void
       {
          super.LoadSprites();
+         if(this.m_isInfiniteTowerRoom)
+         {
+            Singleton.utility.m_soundController.ChangeMusicTrack(Singleton.dynamicData.m_prevBackgroundMusic);
+            Singleton.utility.m_soundController.FadeCurrentMusic(0.4,2);
+            return;
+         }
          this.m_minionDetailsObject = new EggeryMinionDetailsObject();
          this.m_minionDetailsObject.LoadSprites();
          Singleton.utility.m_screenControllers.m_topDownScreen.addChild(this.m_minionDetailsObject);
@@ -39,6 +50,11 @@ package TopDown.Levels.MainTower
       
       override protected function PreformButtonAction(param1:int) : void
       {
+         if(this.m_isInfiniteTowerRoom)
+         {
+            this.PreformInfiniteTowerButtonAction(param1);
+            return;
+         }
          if (Singleton.dynamicData.m_isMod["no_natural_regen"] == true) {
             Singleton.dynamicData.HealAllOfAPlayersInPartyMinions(true);
          }
@@ -129,6 +145,118 @@ package TopDown.Levels.MainTower
             _loc2_.BringInWithText("So, you want to play against others?\nIt\'s not going to be easy...","MultiGuy");
          }
       }
+
+      private function PreformInfiniteTowerButtonAction(param1:int) : void
+      {
+         var _loc1_:MainChar = Singleton.utility.m_screenControllers.m_topDownScreen.m_topDownMovementScreen.m_mainChar;
+         if(_loc1_.m_chatBox.m_isOpen)
+         {
+            return;
+         }
+         var _loc2_:StandardChatBox = GetChatBoxForButtonZone(param1);
+         if(param1 == 0)
+         {
+            _loc2_.SetFunctions();
+            if(Singleton.dynamicData.m_infiniteTowerJustCompleted)
+            {
+               _loc2_.BringInWithText("You conquered the " + this.GetInfiniteTowerModeName(Singleton.dynamicData.m_infiniteTowerCompletedMode) + " trial! Every trainer in that category has been defeated.","Grand Sage");
+               Singleton.dynamicData.m_infiniteTowerJustCompleted = false;
+            }
+            else if(Singleton.dynamicData.m_isInInfiniteTower)
+            {
+               _loc2_.BringInWithText("Your " + this.GetInfiniteTowerModeName(Singleton.dynamicData.m_infiniteTowerMode) + " run is waiting at room " + Singleton.dynamicData.m_infiniteTowerRoom + ". Speak to its cloaked sage when you are ready.","Grand Sage");
+            }
+            else if(Singleton.dynamicData.m_infiniteTowerBestRoom > 0)
+            {
+               _loc2_.BringInWithText("Records - Normal: room " + Singleton.dynamicData.m_infiniteTowerBestNormalRoom + "/151. Hard: room " + Singleton.dynamicData.m_infiniteTowerBestHardRoom + "/151. All Trainers: room " + Singleton.dynamicData.m_infiniteTowerBestAllRoom + "/302.","Grand Sage");
+            }
+            else
+            {
+               _loc2_.BringInWithText("Welcome to the Infinite Tower. You will face every trainer one by one. Health carries between rooms and fallen minions stay down, but energy returns. Choose a cloaked sage behind me.","Grand Sage");
+            }
+            return;
+         }
+         this.TalkToInfiniteTowerSage(param1 - 1,_loc2_);
+      }
+
+      private function TalkToInfiniteTowerSage(param1:int, param2:StandardChatBox) : void
+      {
+         if(Singleton.dynamicData.m_isInInfiniteTower && Singleton.dynamicData.m_infiniteTowerMode != param1)
+         {
+            param2.SetFunctions();
+            param2.BringInWithText("Another trial is already active. Continue it with its sage, or leave through the exit to abandon it.",this.GetInfiniteTowerModeName(param1) + " Sage");
+            return;
+         }
+         if(param1 == 0)
+         {
+            param2.SetFunctions(this.StartNormalInfiniteTower);
+         }
+         else if(param1 == 1)
+         {
+            param2.SetFunctions(this.StartHardInfiniteTower);
+         }
+         else
+         {
+            param2.SetFunctions(this.StartAllInfiniteTower);
+         }
+         if(Singleton.dynamicData.m_isInInfiniteTower)
+         {
+            param2.BringInWithText("Room " + Singleton.dynamicData.m_infiniteTowerRoom + " awaits. Continue the trial?",this.GetInfiniteTowerModeName(param1) + " Sage");
+         }
+         else
+         {
+            param2.BringInWithText("Begin an endless run through " + this.GetInfiniteTowerModeName(param1).toLowerCase() + " trainers?",this.GetInfiniteTowerModeName(param1) + " Sage");
+         }
+      }
+
+      private function StartNormalInfiniteTower() : void
+      {
+         this.StartInfiniteTower(0);
+      }
+
+      private function StartHardInfiniteTower() : void
+      {
+         this.StartInfiniteTower(1);
+      }
+
+      private function StartAllInfiniteTower() : void
+      {
+         this.StartInfiniteTower(2);
+      }
+
+      private function StartInfiniteTower(param1:int) : void
+      {
+         if(!Singleton.dynamicData.m_isInInfiniteTower)
+         {
+            Singleton.dynamicData.StartInfiniteTowerRun(param1);
+         }
+         Singleton.dynamicData.m_currTransitionID = SpecialRoom.INFINITE_TOWER;
+         Singleton.dynamicData.RecordInfiniteTowerRoom();
+         if(Singleton.staticData.m_trainerSystem.LoadInfiniteTowerTrainer(param1,Singleton.dynamicData.m_infiniteTowerRoom) == null)
+         {
+            Singleton.dynamicData.EndInfiniteTowerRun();
+            return;
+         }
+         if(Singleton.dynamicData.m_isAutoSaveOn)
+         {
+            Singleton.dynamicData.SaveAllData(Singleton.dynamicData.m_saveSlot);
+         }
+         Singleton.utility.m_soundController.FadeCurrentMusic(0,0.5);
+         Singleton.utility.m_screenControllers.SetSceneTo(GameState.BATTLE_SCREEN,true);
+      }
+
+      private function GetInfiniteTowerModeName(param1:int) : String
+      {
+         if(param1 == 0)
+         {
+            return "Normal";
+         }
+         if(param1 == 1)
+         {
+            return "Hard";
+         }
+         return "All Trainers";
+      }
       
       public function AddToFirstAvailiblePosition() : void
       {
@@ -196,6 +324,11 @@ package TopDown.Levels.MainTower
       {
          var _loc3_:ButtonZone = null;
          super.CreateObjects();
+         if(this.m_isInfiniteTowerRoom)
+         {
+            this.CreateInfiniteTowerObjects();
+            return;
+         }
          m_roomBounds.graphics.beginFill(0);
          m_roomBounds.graphics.drawRect(0,0,3051.45,2202.15);
          m_roomBounds.graphics.endFill();
@@ -646,7 +779,15 @@ package TopDown.Levels.MainTower
          //assumed it was a wall
          
 
-         if(!Singleton.dynamicData.m_isMod["iceFloor"])
+         if(Singleton.dynamicData.m_isMod["infiniteTower"])
+         {
+            AddObject("generalRoom_sideDoor",2965.9,1033.15,1,1,0);
+            AddObject("roomTransitionObject" + SpecialRoom.INFINITE_TOWER,3020,1033.15,1.7238771306,0.529846366,90);
+            AddObject("entryObject" + SpecialRoom.INFINITE_TOWER_EXIT,2890,1033,1,1,0);
+            AddObject("collRect",2970,835,0.339996337890625,4,0);
+            AddObject("collRect",2970,1170,0.339996337890625,10.88079833984375 * 0.35,0);
+         }
+         else if(!Singleton.dynamicData.m_isMod["iceFloor"])
          {
             AddObject("generalRoom_sideDoor",2965.9,1033.15,1,1,0); //add the new side door
             AddObject("IceFloorEntry",3020,1033.15,1.7238771306,0.529846366,90);
@@ -664,6 +805,52 @@ package TopDown.Levels.MainTower
             AddObject("collRect",2445,870,0.44000244140625,0.279998779296875,0);
          }
          
+      }
+
+      private function CreateInfiniteTowerObjects() : void
+      {
+         m_roomBounds.graphics.beginFill(0);
+         m_roomBounds.graphics.drawRect(0,0,1000,800);
+         m_roomBounds.graphics.endFill();
+         Singleton.utility.m_screenControllers.m_topDownScreen.m_topDownMovementScreen.m_bottomVisualLayer.addChild(m_roomBounds);
+         var _loc1_:int = 0;
+         var _loc2_:int = 0;
+         while(_loc2_ < 7)
+         {
+            _loc1_ = 0;
+            while(_loc1_ < 9)
+            {
+               AddObject("generalRoom_floorTile",-20 + _loc1_ * 120,-20 + _loc2_ * 120,1,1,0);
+               _loc1_++;
+            }
+            _loc2_++;
+         }
+         AddObject("generalRoom_lobby_bottomDoor",450,708,1,1,0);
+         AddObject("roomTransitionObject" + SpecialRoom.INFINITE_TOWER_EXIT,500,770,1.7,0.55,0);
+         AddObject("entryObject" + SpecialRoom.INFINITE_TOWER,500,650,1,1,0);
+         AddObject("generalRoom_grandWizard",470,430,1,1,0);
+         AddObject("generalRoom_hardEnemy",245,220,1,1,0);
+         AddObject("generalRoom_hardEnemy",470,220,1,1,0);
+         AddObject("generalRoom_hardEnemy",695,220,1,1,0);
+         AddObject("buttonZoneObject0",450,425,1.5,1.5,0);
+         AddObject("buttonZoneObject1",225,215,1.5,1.5,0);
+         AddObject("buttonZoneObject2",450,215,1.5,1.5,0);
+         AddObject("buttonZoneObject3",675,215,1.5,1.5,0);
+         AddObject("menus_speechBubble0",355,320,1,1,0);
+         AddObject("menus_speechBubble1",130,110,1,1,0);
+         AddObject("menus_speechBubble2",355,110,1,1,0);
+         AddObject("menus_speechBubble3",580,110,1,1,0);
+         AddObject("generalRoom_topWall",0,0,5,1,0);
+         AddObject("generalRoom_topWall",500,0,5,1,0);
+         AddObject("generalRoom_bottomWall",0,700,2.2,1,0);
+         AddObject("generalRoom_bottomWall",580,700,2.1,1,0);
+         AddObject("generalRoom_sideWall",0,0,1,4,0);
+         AddObject("generalRoom_sideWall",970,0,1,4,0);
+         AddObject("collRect",0,0,10,0.3,0);
+         AddObject("collRect",0,0,0.3,8,0);
+         AddObject("collRect",970,0,0.3,8,0);
+         AddObject("collRect",0,750,4.4,0.5,0);
+         AddObject("collRect",580,750,4.2,0.5,0);
       }
    }
 }

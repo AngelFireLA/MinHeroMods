@@ -179,7 +179,7 @@ package PresistentData
          }
          this.m_all_minion_mods.push("BMod 1","BMod 2","BMod 3"); //used to setup the DexID, hence after output
          this.m_all_other_mods = new Vector.<String>();
-         this.m_all_other_mods.push("iceFloor","nuzlocke", "no_natural_regen");
+         this.m_all_other_mods.push("iceFloor","nuzlocke", "no_natural_regen","infiniteTower");
          trace("All known other mods:");
          for each(var mod in this.m_all_other_mods)
          {
@@ -971,6 +971,16 @@ package PresistentData
             _loc2_ = this.m_specialRooms[0];
             Singleton.utility.m_screenControllers.m_topDownScreen.m_topDownMovementScreen.TurnOffTheMiniMap();
          }
+         else if(Singleton.dynamicData.m_currTransitionID == SpecialRoom.INFINITE_TOWER)
+         {
+            _loc2_ = this.m_specialRooms[1];
+            Singleton.utility.m_screenControllers.m_topDownScreen.m_topDownMovementScreen.TurnOffTheMiniMap();
+         }
+         else if(Singleton.dynamicData.m_currTransitionID == SpecialRoom.INFINITE_TOWER_EXIT)
+         {
+            _loc2_ = this.m_specialRooms[0];
+            Singleton.utility.m_screenControllers.m_topDownScreen.m_topDownMovementScreen.TurnOffTheMiniMap();
+         }
          if(!_loc1_ && Singleton.dynamicData.m_currTransitionID == SpecialRoom.LOBBY_START)
          {
             _loc3_ = Singleton.dynamicData.m_currTransitionID;
@@ -1051,6 +1061,7 @@ package PresistentData
       {
          this.m_specialRooms = new Vector.<BaseTopDownLevel>();
          this.m_specialRooms.push(new Lobby());
+         this.m_specialRooms.push(new Lobby(true));
          this.m_normalRooms = new Vector.<Vector.<BaseTopDownLevel>>();
          this.m_miniMapDataObjects = new Vector.<Vector.<MiniMapDataObject>>();
          this.m_miniMapPositions = new Vector.<Point>(this.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER);

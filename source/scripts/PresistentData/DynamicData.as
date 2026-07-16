@@ -50,6 +50,26 @@ package PresistentData
       public var m_currTransitionID:int;
       
       public var m_currTrainerID:int;
+
+      public var m_isInInfiniteTower:Boolean;
+
+      public var m_infiniteTowerMode:int;
+
+      public var m_infiniteTowerRoom:int;
+
+      public var m_infiniteTowerBestRoom:int;
+
+      public var m_infiniteTowerBestMode:int;
+
+      public var m_infiniteTowerBestNormalRoom:int;
+
+      public var m_infiniteTowerBestHardRoom:int;
+
+      public var m_infiniteTowerBestAllRoom:int;
+
+      public var m_infiniteTowerJustCompleted:Boolean;
+
+      public var m_infiniteTowerCompletedMode:int;
       
       public var m_currKeysOnFloor:int;
       
@@ -1078,6 +1098,73 @@ package PresistentData
             _loc1_++;
          }
       }
+
+      public function StartInfiniteTowerRun(param1:int) : void
+      {
+         this.m_isInInfiniteTower = true;
+         this.m_infiniteTowerMode = param1;
+         this.m_infiniteTowerRoom = 1;
+         this.m_infiniteTowerJustCompleted = false;
+         this.HealAllOfAPlayersInPartyMinions(true);
+      }
+
+      public function RecordInfiniteTowerRoom() : void
+      {
+         if(this.m_infiniteTowerRoom > this.m_infiniteTowerBestRoom)
+         {
+            this.m_infiniteTowerBestRoom = this.m_infiniteTowerRoom;
+            this.m_infiniteTowerBestMode = this.m_infiniteTowerMode;
+         }
+         if(this.m_infiniteTowerMode == 0 && this.m_infiniteTowerRoom > this.m_infiniteTowerBestNormalRoom)
+         {
+            this.m_infiniteTowerBestNormalRoom = this.m_infiniteTowerRoom;
+         }
+         else if(this.m_infiniteTowerMode == 1 && this.m_infiniteTowerRoom > this.m_infiniteTowerBestHardRoom)
+         {
+            this.m_infiniteTowerBestHardRoom = this.m_infiniteTowerRoom;
+         }
+         else if(this.m_infiniteTowerMode == 2 && this.m_infiniteTowerRoom > this.m_infiniteTowerBestAllRoom)
+         {
+            this.m_infiniteTowerBestAllRoom = this.m_infiniteTowerRoom;
+         }
+      }
+
+      public function CompleteInfiniteTowerRoom() : void
+      {
+         ++this.m_infiniteTowerRoom;
+         this.RecordInfiniteTowerRoom();
+      }
+
+      public function PreparePartyForNextInfiniteTowerBattle() : void
+      {
+         var _loc1_:int = 0;
+         while(_loc1_ < 5)
+         {
+            if(this.m_ownedMinions[_loc1_] != null)
+            {
+               this.m_ownedMinions[_loc1_].ReFillEnergyAndClearBattleState();
+            }
+            _loc1_++;
+         }
+      }
+
+      public function EndInfiniteTowerRun() : void
+      {
+         this.RecordInfiniteTowerRoom();
+         this.m_isInInfiniteTower = false;
+         this.m_infiniteTowerRoom = 0;
+         this.HealAllOfAPlayersInPartyMinions(true);
+      }
+
+      public function CompleteInfiniteTowerRun() : void
+      {
+         this.RecordInfiniteTowerRoom();
+         this.m_infiniteTowerCompletedMode = this.m_infiniteTowerMode;
+         this.m_infiniteTowerJustCompleted = true;
+         this.m_isInInfiniteTower = false;
+         this.m_infiniteTowerRoom = 0;
+         this.HealAllOfAPlayersInPartyMinions(true);
+      }
       
       public function GetGlobalPassiveMovesForPlayer() : Vector.<int>
       {
@@ -1326,6 +1413,14 @@ package PresistentData
          this.SaveValue("m_currFloorOfTower");
          this.SaveValue("m_currRoomOfTower");
          this.SaveValue("m_currTransitionID");
+         this.SaveValue("m_isInInfiniteTower");
+         this.SaveValue("m_infiniteTowerMode");
+         this.SaveValue("m_infiniteTowerRoom");
+         this.SaveValue("m_infiniteTowerBestRoom");
+         this.SaveValue("m_infiniteTowerBestMode");
+         this.SaveValue("m_infiniteTowerBestNormalRoom");
+         this.SaveValue("m_infiniteTowerBestHardRoom");
+         this.SaveValue("m_infiniteTowerBestAllRoom");
          this.SaveValue("m_prevBackgroundMusic");
          this.SaveValue("m_currMoney");
          this.SaveValue("m_currKeysOnFloor");
@@ -1465,6 +1560,14 @@ package PresistentData
          this.SetInitialValue("m_currFloorOfTower",0);
          this.SetInitialValue("m_currRoomOfTower",0);
          this.SetInitialValue("m_currTransitionID",0);
+         this.SetInitialValue("m_isInInfiniteTower",false);
+         this.SetInitialValue("m_infiniteTowerMode",0);
+         this.SetInitialValue("m_infiniteTowerRoom",0);
+         this.SetInitialValue("m_infiniteTowerBestRoom",0);
+         this.SetInitialValue("m_infiniteTowerBestMode",0);
+         this.SetInitialValue("m_infiniteTowerBestNormalRoom",0);
+         this.SetInitialValue("m_infiniteTowerBestHardRoom",0);
+         this.SetInitialValue("m_infiniteTowerBestAllRoom",0);
          this.SetInitialValue("m_prevBackgroundMusic",BackgroundMusicTracks.MUSIC_NONE);
          this.SetInitialValue("m_currMoney",0);
          this.SetInitialValue("m_currKeysOnFloor",0);

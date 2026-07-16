@@ -727,6 +727,13 @@ package Minions
          }
          this.m_currEnergy = this.m_currEnergyStat;
       }
+
+      public function ReFillEnergyAndClearBattleState() : void
+      {
+         this.ClearBuffsAndDebuffs();
+         this.CalculateCurrStats();
+         this.m_currEnergy = this.m_currEnergyStat;
+      }
       
       public function AddShield(param1:int) : void
       {

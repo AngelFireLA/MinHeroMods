@@ -2,6 +2,7 @@ package BattleSystems.LoseScreen
 {
    import BattleSystems.Other.BaseBattleFinishScreen;
    import States.GameState;
+   import States.SpecialRoom;
    import Utilities.Singleton;
    import com.greensock.TimelineLite;
    import com.greensock.TweenLite;
@@ -55,6 +56,14 @@ package BattleSystems.LoseScreen
       
       override protected function GotoTopDownScreen() : void
       {
+         if(Singleton.dynamicData.m_isInInfiniteTower)
+         {
+            this.m_loseText.text = "Your Infinite Tower run ends at room " + Singleton.dynamicData.m_infiniteTowerRoom + ".";
+         }
+         else
+         {
+            this.m_loseText.text = "Your minions have collapsed,  you rush to heal them";
+         }
          this.m_loseText.visible = true;
          this.m_blackBackground.visible = true;
          this.m_loseText.alpha = 0;
@@ -72,6 +81,19 @@ package BattleSystems.LoseScreen
       
       public function GotoTopDownScreen_part2() : void
       {
+         if(Singleton.dynamicData.m_isInInfiniteTower)
+         {
+            Singleton.dynamicData.m_currTransitionID = SpecialRoom.INFINITE_TOWER;
+            Singleton.dynamicData.m_topDownCharPositionX = -99;
+            Singleton.dynamicData.m_topDownCharPositionY = -99;
+            Singleton.dynamicData.EndInfiniteTowerRun();
+            if(Singleton.dynamicData.m_isAutoSaveOn)
+            {
+               Singleton.dynamicData.SaveAllData(Singleton.dynamicData.m_saveSlot);
+            }
+            Singleton.utility.m_screenControllers.SetSceneTo(GameState.TOP_DOWN_SCREEN);
+            return;
+         }
          Singleton.dynamicData.SetToReturnToOnDeathPoint();
          Singleton.dynamicData.HealAllOfAPlayersInPartyMinions();
          Singleton.utility.m_screenControllers.SetSceneTo(GameState.TOP_DOWN_SCREEN);

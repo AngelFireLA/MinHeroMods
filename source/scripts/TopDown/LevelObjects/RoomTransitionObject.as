@@ -22,6 +22,11 @@ package TopDown.LevelObjects
       {
          var _loc3_:MainChar = null;
          super.OnColl();
+         if(this.m_transitionID == SpecialRoom.INFINITE_TOWER || this.m_transitionID == SpecialRoom.INFINITE_TOWER_EXIT)
+         {
+            TweenLite.to(this,0.01,{"onComplete":this.DoOnCollCode});
+            return;
+         }
          var _loc1_:int = Singleton.dynamicData.m_currFloorOfTower;
          var _loc2_:Boolean = _loc1_ == 4 || _loc1_ == 9 || _loc1_ == 14 || _loc1_ == 19 || _loc1_ == 24 || _loc1_ == 29 || _loc1_ == 30 || _loc1_ == 35 || _loc1_ == 40 || _loc1_ == 45 || _loc1_ == 50 || _loc1_ == 55 || _loc1_ == 60 || _loc1_ == 61;
          if(_loc2_)
@@ -40,6 +45,14 @@ package TopDown.LevelObjects
       
       private function DoOnCollCode() : void
       {
+         if(this.m_transitionID == SpecialRoom.INFINITE_TOWER_EXIT && Singleton.dynamicData.m_isInInfiniteTower)
+         {
+            Singleton.dynamicData.EndInfiniteTowerRun();
+            if(Singleton.dynamicData.m_isAutoSaveOn)
+            {
+               Singleton.dynamicData.SaveAllData(Singleton.dynamicData.m_saveSlot);
+            }
+         }
          Singleton.dynamicData.m_topDownCharPositionX = -99;
          Singleton.dynamicData.m_topDownCharPositionY = -99;
          Singleton.dynamicData.m_currRoomOfTower = Singleton.staticData.GetRoomForTransitionID(this.m_transitionID);

@@ -20,6 +20,7 @@ package BattleSystems
    import States.MinionDexID;
    import States.ModStoneTypes;
    import States.StarUpgradeTypes;
+   import States.SpecialRoom;
    import States.TrainerType;
    import States.TutorialTypes;
    import TopDown.Trainers.TrainerDataObject;
@@ -167,7 +168,14 @@ package BattleSystems
          super.StartActivate();
          this.m_muteSoundButton.m_isToggleOn = Singleton.dynamicData.m_isSoundOn;
          this.m_muteMusicButton.m_isToggleOn = Singleton.dynamicData.m_isMusicOn;
-         Singleton.dynamicData.HealAllOfAPlayersInPartyMinions();
+         if(Singleton.dynamicData.m_isInInfiniteTower)
+         {
+            Singleton.dynamicData.PreparePartyForNextInfiniteTowerBattle();
+         }
+         else
+         {
+            Singleton.dynamicData.HealAllOfAPlayersInPartyMinions();
+         }
          Singleton.utility.m_analyticsController.LogCounterMetric_enterBattle("Battle Started","" + Singleton.dynamicData.m_currFloorOfTower + "_" + Singleton.dynamicData.m_currRoomOfTower);
          this.m_currentMovesTickedForMod = 0;
          this.m_extraPlayerMinionsForMod = 0;
@@ -971,6 +979,32 @@ package BattleSystems
                _loc1_++;
             }
          }
+         if(Singleton.dynamicData.m_isInInfiniteTower)
+         {
+            if(Singleton.dynamicData.m_infiniteTowerRoom >= Singleton.staticData.m_trainerSystem.GetInfiniteTowerTrainerCount(Singleton.dynamicData.m_infiniteTowerMode))
+            {
+               Singleton.dynamicData.CompleteInfiniteTowerRun();
+            }
+            else
+            {
+               Singleton.dynamicData.CompleteInfiniteTowerRoom();
+            }
+            Singleton.utility.m_soundController.FadeCurrentMusic(0,1);
+            Singleton.dynamicData.m_numberOfDeathsSinceVictory = 0;
+            this.m_currState = BattleScreenStates.BSS_VICTORY_MENUS;
+            this.m_winScreen.m_victoryPopup.BringInVictoryPopup();
+            if(Singleton.dynamicData.m_currTrainerData.IsModActive(ModStoneTypes.MOD_STONE_EXTRA_MINIONS))
+            {
+               this.ResetExtraMinionsForBattleMod();
+            }
+            this.m_battleScreenVisualController.SetupVisualsForTheWinningScreen();
+            this.m_winScreen.BringInScreen(true);
+            if(Singleton.dynamicData.m_isAutoSaveOn)
+            {
+               Singleton.dynamicData.SaveAllData(Singleton.dynamicData.m_saveSlot);
+            }
+            return;
+         }
          Singleton.dynamicData.UpdateTrainersStarsForCurrentTrainer();
          Singleton.utility.m_soundController.FadeCurrentMusic(0,1);
          Singleton.dynamicData.m_numberOfDeathsSinceVictory = 0;
@@ -1162,6 +1196,21 @@ package BattleSystems
       public function ForfeitYesButtonPressed() : void
       {
          Singleton.dynamicData.ResetThePlayersBattleModMinions();
+         if(Singleton.dynamicData.m_isInInfiniteTower)
+         {
+            Singleton.dynamicData.m_currTransitionID = SpecialRoom.INFINITE_TOWER;
+            Singleton.dynamicData.m_topDownCharPositionX = -99;
+            Singleton.dynamicData.m_topDownCharPositionY = -99;
+            Singleton.dynamicData.EndInfiniteTowerRun();
+            if(Singleton.dynamicData.m_isAutoSaveOn)
+            {
+               Singleton.dynamicData.SaveAllData(Singleton.dynamicData.m_saveSlot);
+            }
+            Singleton.utility.m_screenControllers.m_topDownScreen.m_topDownMovementScreen.m_actionIcon.visible = false;
+            Singleton.utility.m_soundController.FadeCurrentMusic(0,0.5);
+            Singleton.utility.m_screenControllers.SetSceneTo(GameState.TOP_DOWN_SCREEN);
+            return;
+         }
          Singleton.dynamicData.SetToReturnToOnDeathPoint();
          Singleton.dynamicData.HealAllOfAPlayersInPartyMinions();
          Singleton.utility.m_screenControllers.m_topDownScreen.m_topDownMovementScreen.m_actionIcon.visible = false;
