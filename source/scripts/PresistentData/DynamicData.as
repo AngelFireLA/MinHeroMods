@@ -608,74 +608,6 @@ package PresistentData
          return _loc1_;
       }
 
-      private function DoesTrainerAwardTowerStars(param1:int, param2:int) : Boolean
-      {
-         return Singleton.staticData.m_trainerSystem.DoesTrainerAwardTowerStars(param1,param2);
-      }
-
-      private function RecoverMissingTrainerStars() : void
-      {
-         var expectedTotal:int = Math.max(this.m_totalStars[this.m_saveSlot],this.m_numOfSpentStars,this.CalculateTotalNumberOfStars());
-         var floor:int = 0;
-         var trainer:int = 0;
-         var allFloorsUnlocked:Boolean = true;
-         while(floor < Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER + Singleton.staticData.NUM_OF_FLOORS_IN_THE_HARD_TOWER)
-         {
-            if(!this.m_hasBeatenFloor[floor])
-            {
-               allFloorsUnlocked = false;
-               break;
-            }
-            floor++;
-         }
-
-         // Silent one-time fallback for the two uniquely identifiable layouts
-         // produced for slot 0 by the temporary repair builds. It is retained in
-         // case the corrected in-memory data was viewed but not autosaved. Once
-         // saved as 762 it no longer matches and this path is permanently inert.
-         var isKnownDamagedCompleteSave:Boolean = this.m_saveSlot == 0 && allFloorsUnlocked && (expectedTotal == 592 && this.GetHighestStarCount(49) == 4 && this.GetHighestStarCount(50) == 0 && this.GetHighestStarCount(61) == 0 || expectedTotal == 736 && this.GetHighestStarCount(49) == 16 && this.GetHighestStarCount(56) == 14 && this.GetHighestStarCount(57) == 12 && this.GetHighestStarCount(60) == 2 && this.GetHighestStarCount(61) == 2);
-
-         // Trainer definitions are authoritative about which rooms award tower
-         // stars. Normal-mode hard/expert rooms are playable but do not count
-         // toward the floor's 12 stars; hard-mode rooms all count toward 18.
-         floor = 0;
-         while(floor < this.m_bestTrainerStarCounts.length)
-         {
-            trainer = 0;
-            while(trainer < this.m_bestTrainerStarCounts[floor].length)
-            {
-               if(!this.DoesTrainerAwardTowerStars(floor,trainer))
-               {
-                  this.m_currTrainerStarCounts[floor][trainer] = 0;
-                  this.m_bestTrainerStarCounts[floor][trainer] = 0;
-               }
-               else if(isKnownDamagedCompleteSave)
-               {
-                  // Best scores are persistent completion data. Do not populate
-                  // m_currTrainerStarCounts: that vector is the current floor run
-                  // and must start at zero when re-entering through the elevator.
-                  this.m_bestTrainerStarCounts[floor][trainer] = 3;
-               }
-               trainer++;
-            }
-            floor++;
-         }
-
-         var recoveredTotal:int = this.CalculateTotalNumberOfStars();
-         if(isKnownDamagedCompleteSave)
-         {
-            trace("Repaired known completed slot 0 star layout: " + expectedTotal + " -> " + recoveredTotal);
-         }
-         else if(expectedTotal != recoveredTotal)
-         {
-            trace("Star aggregate differs from exact best-score data; preserving exact room scores: aggregate=" + expectedTotal + " exact=" + recoveredTotal);
-         }
-
-         this.m_totalStars[this.m_saveSlot] = recoveredTotal;
-         this.CalculateTotatNumberOfAvailbleStars();
-         trace("Validated trainer-star placement: " + this.m_totalStars[this.m_saveSlot]);
-      }
-      
       public function ResetThePlayersBattleModMinions() : void
       {
          var _loc1_:int = 0;
@@ -1723,7 +1655,11 @@ package PresistentData
          }
          if(param2)
          {
-            this.RecoverMissingTrainerStars();
+            // Exact saved per-trainer best scores are authoritative. Rebuild only
+            // their aggregate and spendable total; never infer scores from floor
+            // unlocks, completion flags, or old aggregate metadata.
+            this.m_totalStars[this.m_saveSlot] = this.CalculateTotalNumberOfStars();
+            this.CalculateTotatNumberOfAvailbleStars();
          }
          var _loc5_:int = 0;
          while(_loc5_ < 4)
