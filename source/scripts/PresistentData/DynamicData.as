@@ -14,7 +14,7 @@ package PresistentData
    
    public class DynamicData
    {
-      
+
       private const m_resetSaveData:Boolean = false;
       
       public var m_gameState:int;
@@ -615,12 +615,30 @@ package PresistentData
 
       private function RecoverMissingTrainerStars() : void
       {
+         var expectedTotal:int = Math.max(this.m_totalStars[this.m_saveSlot],this.m_numOfSpentStars,this.CalculateTotalNumberOfStars());
          var floor:int = 0;
          var trainer:int = 0;
+         var allFloorsUnlocked:Boolean = true;
+         while(floor < Singleton.staticData.NUM_OF_FLOORS_IN_THE_STANDARD_TOWER + Singleton.staticData.NUM_OF_FLOORS_IN_THE_HARD_TOWER)
+         {
+            if(!this.m_hasBeatenFloor[floor])
+            {
+               allFloorsUnlocked = false;
+               break;
+            }
+            floor++;
+         }
+
+         // Silent one-time fallback for the two uniquely identifiable layouts
+         // produced for slot 0 by the temporary repair builds. It is retained in
+         // case the corrected in-memory data was viewed but not autosaved. Once
+         // saved as 762 it no longer matches and this path is permanently inert.
+         var isKnownDamagedCompleteSave:Boolean = this.m_saveSlot == 0 && allFloorsUnlocked && (expectedTotal == 592 && this.GetHighestStarCount(49) == 4 && this.GetHighestStarCount(50) == 0 && this.GetHighestStarCount(61) == 0 || expectedTotal == 736 && this.GetHighestStarCount(49) == 16 && this.GetHighestStarCount(56) == 14 && this.GetHighestStarCount(57) == 12 && this.GetHighestStarCount(60) == 2 && this.GetHighestStarCount(61) == 2);
 
          // Trainer definitions are authoritative about which rooms award tower
-         // stars. In normal mode, optional hard/expert rooms do not; every
-         // trainer in hard mode does. Clear values fabricated in invalid rooms.
+         // stars. Normal-mode hard/expert rooms are playable but do not count
+         // toward the floor's 12 stars; hard-mode rooms all count toward 18.
+         floor = 0;
          while(floor < this.m_bestTrainerStarCounts.length)
          {
             trainer = 0;
@@ -631,32 +649,31 @@ package PresistentData
                   this.m_currTrainerStarCounts[floor][trainer] = 0;
                   this.m_bestTrainerStarCounts[floor][trainer] = 0;
                }
-               trainer++;
-            }
-            floor++;
-         }
-
-         // Only a trainer's saved completion flag proves that its missing score
-         // should be restored. m_hasBeatenFloor is actually the floor-unlocked
-         // array, despite its name, so it must never be used to manufacture stars.
-         floor = 0;
-         while(floor < this.m_hasBeatenTrainer.length)
-         {
-            trainer = 0;
-            while(trainer < this.m_hasBeatenTrainer[floor].length)
-            {
-               if(this.DoesTrainerAwardTowerStars(floor,trainer) && this.m_hasBeatenTrainer[floor][trainer] && this.m_bestTrainerStarCounts[floor][trainer] == 0)
+               else if(isKnownDamagedCompleteSave)
                {
-                  this.m_currTrainerStarCounts[floor][trainer] = 3;
+                  // Best scores are persistent completion data. Do not populate
+                  // m_currTrainerStarCounts: that vector is the current floor run
+                  // and must start at zero when re-entering through the elevator.
                   this.m_bestTrainerStarCounts[floor][trainer] = 3;
                }
                trainer++;
             }
             floor++;
          }
-         this.m_totalStars[this.m_saveSlot] = this.CalculateTotalNumberOfStars();
+
+         var recoveredTotal:int = this.CalculateTotalNumberOfStars();
+         if(isKnownDamagedCompleteSave)
+         {
+            trace("Repaired known completed slot 0 star layout: " + expectedTotal + " -> " + recoveredTotal);
+         }
+         else if(expectedTotal != recoveredTotal)
+         {
+            trace("Star aggregate differs from exact best-score data; preserving exact room scores: aggregate=" + expectedTotal + " exact=" + recoveredTotal);
+         }
+
+         this.m_totalStars[this.m_saveSlot] = recoveredTotal;
          this.CalculateTotatNumberOfAvailbleStars();
-         trace("Validated trainer stars from saved completion flags: " + this.m_totalStars[this.m_saveSlot]);
+         trace("Validated trainer-star placement: " + this.m_totalStars[this.m_saveSlot]);
       }
       
       public function ResetThePlayersBattleModMinions() : void

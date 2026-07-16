@@ -261,6 +261,23 @@ def backup_current_output():
     print(f"Backed up default.swf to {backup_path.relative_to(ROOT)}")
 
 
+def cleanup_abandoned_build_folders():
+    """Remove work folders left by an interrupted or killed earlier build."""
+    root = ROOT.resolve()
+    for folder in ROOT.glob("minhero_build_*"):
+        resolved = folder.resolve()
+        if not folder.is_dir() or resolved.parent != root:
+            continue
+        try:
+            shutil.rmtree(resolved)
+            print(f"Removed abandoned build folder: {folder.name}")
+        except OSError as error:
+            print(
+                f"Warning: could not remove abandoned build folder {folder.name}: {error}",
+                file=sys.stderr,
+            )
+
+
 def main():
     """Build a fresh SWF from original.swf and all detected source changes."""
     if not JPEXS_CLI.is_file():
@@ -270,6 +287,7 @@ def main():
     if not SYMBOLS_FILE.is_file():
         raise BuildError(f"SymbolClass file is missing: {SYMBOLS_FILE}")
 
+    cleanup_abandoned_build_folders()
     normalize_new_images()
     changes = modified_detector.main()
     new_scripts = [
