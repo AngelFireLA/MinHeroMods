@@ -1,6 +1,7 @@
-from PIL import Image
-import zlib
-import subprocess
+import shutil
+from pathlib import Path
+
+import build_swf
 # Need to have been extracted using the extract_from_swf.bat script.
 minion_dex_id_path = r"source\scripts\States\MinionDexID.as"
 all_minions_container_path = r"source\scripts\Minions\AllMinionsContainer.as"
@@ -9,17 +10,6 @@ images_folder_path = r"source\images"
 
 # Path to your minion's image
 new_minion_image_path = r"C:\Dev\basard\Min Hero\MinHeroMods\eevee_minion.png"
-
-# Unmodified SWF 
-base_swf_path = "original.swf"
-
-# Final SWF after modifications
-final_swf_path = "default.swf"
-
-intermediary_xml_path = "dump.xml"
-
-# Path to the modified file detector script so we don't recompile every script every time
-modified_file_detector_script_path = "modified_detector.py"
 
 def add_dex_id(minion_code_name):
     # We need to add the minion to the DEX IDs file, but it can't just be the last one, it needs to be before the 4 not-really-minions.
@@ -153,244 +143,51 @@ def add_minion_container(minion_code_name:str, minion_name:str, icon_offset_x:in
         f.write(content)
 
 
+
+
 def add_image(image_path, minion_code_name):
+    """Copy a new minion image into source using the exported JPEXS naming style."""
+    image_path = Path(image_path)
+    if not image_path.is_file():
+        raise FileNotFoundError(f"Minion image does not exist: {image_path}")
 
-    # we get the last index of the symbol classes so we know what new index to use for the new image
-    with open(symbol_classes_path, "r") as f:
-        lines = f.readlines()
-        # remove any empty lines
-        lines = [line for line in lines if line.strip()]
-        last_value = lines[-1].split(";")[0] 
+    symbol_path = Path(symbol_classes_path)
+    rows = []
+    for line in symbol_path.read_text(encoding="utf-8-sig").splitlines():
+        if not line.strip():
+            continue
+        character_id_text, class_name = line.split(";", 1)
+        rows.append((int(character_id_text), class_name))
 
-    new_index = int(last_value) + 1
+    class_name = f"Utilities.SpriteHandler_{minion_code_name}"
+    if any(existing_class == class_name for _, existing_class in rows):
+        raise ValueError(f"SymbolClass already exists: {class_name}")
 
-    # we add it to the file even though it doesn't do anything, just in case we want to add another minion later
-    new_line = f"{new_index};Utilities.SpriteHandler_{minion_code_name}\n"
-    with open(symbol_classes_path, "w") as f:
-        f.writelines(lines)
-        f.write(new_line)
+    new_index = max((character_id for character_id, _ in rows), default=0) + 1
+    extension = image_path.suffix.lower() or ".png"
+    new_file_name = f"{new_index}_{class_name}{extension}"
+    destination = Path(images_folder_path) / new_file_name
+    if destination.exists():
+        raise FileExistsError(f"Image destination already exists: {destination}")
 
-    # We make the imag's unique class so it can later be imported in the swf file to replace the one made using xml
-    new_file_name = f"{new_index}_Utilities.SpriteHandler_{minion_code_name}.png"
-    custom_sprite_handler_path = f"source/scripts/Utilities/SpriteHandler_{minion_code_name}.as"
-    custom_sprite_handler_content = f"""
-package Utilities
-{{
-   import mx.core.BitmapAsset;
-   
-   [Embed(source="/_assets/{new_file_name}")]
-   public class SpriteHandler_{minion_code_name} extends BitmapAsset
-   {{
-       
-      public function SpriteHandler_{minion_code_name}()
-      {{
-         super();
-      }}
-   }}
-}}
-"""
-    with open(custom_sprite_handler_path, "w") as f:
-        f.write(custom_sprite_handler_content)
-
-    # We define the image in the main SpriteHandler.as file
-    main_sprite_handler_path = f"source/scripts/Utilities/SpriteHandler.as"
-    custom_minion_line = f"      private static var {minion_code_name}:Class = SpriteHandler_{minion_code_name};\n"
-
-    with open(main_sprite_handler_path, "r") as f:
-        lines = f.readlines()
-        # we find the last SpriteHandler definition so we can add our line  abit below
-        for i, line in enumerate(lines):
-            if "public class SpriteHandler" in line:
-                lines.insert(i + 2, custom_minion_line)
-                break
-    with open(main_sprite_handler_path, "w") as f:
-        f.writelines(lines)
-
-    print("Starting swf2xml...")
-    subprocess.run(fr'"jpexs\ffdec-cli.exe" -swf2xml {base_swf_path} {intermediary_xml_path}', shell=True)
-    print("SWF to XML conversion completed.")
-
-    with open(intermediary_xml_path, "r") as f:
-        dump_lines = f.readlines()
-
-    # we anchor ourselves on a specific line we know we can add the image code just before
-    define_bits_index = None
-    for idx, line in enumerate(dump_lines):
-        if '<item type="DefineBitsLossless2Tag" bitmapColorTableSize="0"' in line:
-            define_bits_index = idx
-            break
-
-    im = Image.open(image_path).convert("RGBA")
-    w, h = im.size
-
-    # To not have wrong colors, we have to swap some channels around.
-    r, g, b, a = im.split()
-    bgra = Image.merge("RGBA", (a, r, g, b))
-
-    # 3) We compress the image in a format flash understand
-    raw = bgra.tobytes()
-    comp = zlib.compress(raw)
-    hexstr = comp.hex()
-
-    # Template copy pasted and then we replace the values with the ones we need
-    image_string = f"""
-    <item type="DefineBitsLossless2Tag" bitmapColorTableSize="0" bitmapFormat="5" bitmapHeight="{h}" bitmapWidth="{w}" characterID="{new_index}" forceWriteAsLong="true" zlibBitmapData="{hexstr}"/>
-"""
-    # we add the image to the xml file
-    dump_lines.insert(define_bits_index, image_string)
-
-    # We need to add the image to the symbol classes, so we anchor ourselves on specific lines so we can add the new values just before them
-    closing_tag_indices = [i for i, line in enumerate(dump_lines) if "</tags>" in line]
-    third_index = closing_tag_indices[2]
-    dump_lines.insert(third_index, f"        <item>{new_index}</item>\n")
-
-    name_tag_indices = [i for i, line in enumerate(dump_lines) if "</names>" in line]
-    last_index = name_tag_indices[-1]
-    dump_lines.insert(last_index, f"        <item>Utilities.SpriteHandler_{minion_code_name}</item>\n")
-
-
-    # To add the new class file, we use a template of a whole new tag so we just have to replace the values we need and the rest we can ignore
-    # we'll replace the classes' content later anyway, we just need to have it exist in the XML file so it can be imported into the SWF file later.
-    string_to_add = f"""
-    <item type="DoABC2Tag" flags="0" forceWriteAsLong="false" name="Utilities.SpriteHandler_{minion_code_name}">
-      <abc type="ABC">
-        <version type="ABCVersion" major="46" minor="16"/>
-        <constants type="AVM2ConstantPool">
-          <constant_int/>
-          <constant_uint/>
-          <constant_double/>
-          <constant_decimal/>
-          <constant_float/>
-          <constant_float4/>
-          <constant_string>
-            <item isNull="true"/>
-            <item>http://adobe.com/AS3/2006/builtin</item>
-            <item>Utilities</item>
-            <item>SpriteHandler_{minion_code_name}</item>
-            <item>Object</item>
-            <item/>
-            <item>Utilities:SpriteHandler_{minion_code_name}</item>
-          </constant_string>
-          <constant_namespace>
-            <item isNull="true"/>
-            <item type="Namespace" kind="8" name_index="1"/>
-            <item type="Namespace" kind="22" name_index="2"/>
-            <item type="Namespace" kind="22" name_index="5"/>
-            <item type="Namespace" kind="5" name_index="6"/>
-            <item type="Namespace" kind="24" name_index="6"/>
-          </constant_namespace>
-          <constant_namespace_set>
-            <item isNull="true"/>
-            <item type="NamespaceSet">
-              <namespaces>
-                <item>2</item>
-              </namespaces>
-            </item>
-          </constant_namespace_set>
-          <constant_multiname>
-            <item isNull="true"/>
-            <item type="Multiname" kind="7" name_index="3" namespace_index="2" namespace_set_index="0" qname_index="0"/>
-            <item type="Multiname" kind="7" name_index="4" namespace_index="3" namespace_set_index="0" qname_index="0"/>
-            <item type="Multiname" kind="9" name_index="3" namespace_index="0" namespace_set_index="1" qname_index="0"/>
-          </constant_multiname>
-        </constants>
-        <method_info>
-          <item type="MethodInfo" flags="0" name_index="5" ret_type="0">
-            <param_types/>
-            <optional/>
-            <paramNames/>
-          </item>
-          <item type="MethodInfo" flags="0" name_index="0" ret_type="0">
-            <param_types/>
-            <optional/>
-            <paramNames/>
-          </item>
-          <item type="MethodInfo" flags="0" name_index="5" ret_type="0">
-            <param_types/>
-            <optional/>
-            <paramNames/>
-          </item>
-        </method_info>
-        <metadata_info/>
-        <instance_info>
-          <item type="InstanceInfo" flags="9" iinit_index="1" name_index="1" protectedNS="5" super_index="2">
-            <interfaces/>
-            <instance_traits type="Traits">
-              <traits/>
-            </instance_traits>
-          </item>
-        </instance_info>
-        <class_info>
-          <item type="ClassInfo" cinit_index="2">
-            <static_traits type="Traits">
-              <traits/>
-            </static_traits>
-          </item>
-        </class_info>
-        <script_info>
-          <item type="ScriptInfo" init_index="0">
-            <traits type="Traits">
-              <traits>
-                <item type="TraitClass" class_info="0" deleted="false" fileOffset="0" kindFlags="0" kindType="4" name_index="1" slot_id="1">
-                  <metadata/>
-                </item>
-              </traits>
-            </traits>
-          </item>
-        </script_info>
-        <bodies>
-          <item type="MethodBody" init_scope_depth="1" max_regs="1" max_scope_depth="3" max_stack="2" method_info="0">
-            <exceptions/>
-            <traits type="Traits">
-              <traits/>
-            </traits>
-          </item>
-          <item type="MethodBody" init_scope_depth="4" max_regs="1" max_scope_depth="5" max_stack="1" method_info="1">
-            <exceptions/>
-            <traits type="Traits">
-              <traits/>
-            </traits>
-          </item>
-          <item type="MethodBody" init_scope_depth="3" max_regs="1" max_scope_depth="4" max_stack="1" method_info="2">
-            <exceptions/>
-            <traits type="Traits">
-              <traits/>
-            </traits>
-          </item>
-        </bodies>
-      </abc>
-    </item>
-"""
-    # we anchor ourselves on a specific line we know we can add the tag just before
-    idk = [i for i, line in enumerate(dump_lines) if '<item type="ExportAssetsTag" forceWriteAsLong="true">' in line]
-    last_index = idk[0]
-    dump_lines.insert(last_index, string_to_add)
-
-    # We write the modified XML file
-    with open(intermediary_xml_path, "w") as f:
-        f.writelines(dump_lines)
-
-    print("Starting xml2swf...")
-    subprocess.run(fr'"jpexs\ffdec-cli.exe" -xml2swf {intermediary_xml_path} {final_swf_path}', shell=True)
-    print("SWF to XML conversion completed.")
-
-    print("Starting modified file detector script...")
-    subprocess.run(fr'python {modified_file_detector_script_path}', shell=True)
-    print("Modified file detector script completed.")
-
-    # swf2swf
-    print("Starting importing scripts into swf file...")
-    subprocess.run(fr'"jpexs\ffdec-cli.exe" -importScript {final_swf_path} {final_swf_path} modified', shell=True)
-    print("Scripts imported successfully.")
-
+    shutil.copy2(image_path, destination)
+    rows.append((new_index, class_name))
+    symbol_path.write_text(
+        "".join(f"{character_id};{symbol}\n" for character_id, symbol in rows),
+        encoding="utf-8",
+    )
+    print(f"Prepared new image {destination} with character ID {new_index}.")
+    return new_index
 
 
 def add_minion():
     add_dex_id("eeveeMinion")
     add_minion_container("eeveeMinion", "Eevee", 0, 0, "normal", 4, [1, 4, 7], 100, 100, 100, 100, 100, [8, 5, 6], "water")
     add_image(new_minion_image_path, "eeveeMinion")
-    print("Minion added successfully. Please check the output for any errors.")
+    build_swf.main()
+    print("Minion added and default.swf built successfully.")
 
 
 if __name__ == "__main__":
     add_minion()
+

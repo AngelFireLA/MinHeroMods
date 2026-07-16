@@ -2,6 +2,7 @@
 /old
 # filename to hash table
 file_changes.csv
+/.ffdec-profile
 # auto-generated folder for all the modified scripts
 default.swf
 /modified
@@ -25,3 +26,4 @@ __pycache__/*
 /source/simulator
 simulator/
 /.idea
+/jpexs-decompiler-master
